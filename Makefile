@@ -12,6 +12,7 @@ endif
 
 TAGS=with_gvisor,with_quic,with_utls,with_grpc,with_conntrack,with_clash_api
 IOS_ADD_TAGS=with_dhcp,with_low_memory
+DARWIN_ADD_TAGS=with_dhcp
 GOBUILDLIB=CGO_ENABLED=1 CGO_CFLAGS="-O2 -g0 -pipe" CGO_CXXFLAGS="-O2 -g0 -pipe" CGO_LDFLAGS="-s" go build -trimpath -buildvcs=false -tags $(TAGS) -ldflags="-w -s" -buildmode=c-shared
 
 lib_install:
@@ -43,9 +44,9 @@ linux-amd64:
 	mkdir lib
 
 macos-amd64:
-	env GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-O2 -g0 -pipe -mmacosx-version-min=10.11" CGO_LDFLAGS="-mmacosx-version-min=10.11" CGO_ENABLED=1 go build -trimpath -tags $(TAGS),$(IOS_ADD_TAGS) -ldflags="-w -s" -buildmode=c-shared -o $(BINDIR)/$(LIBNAME)-amd64.dylib ./custom
+	env GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-O2 -g0 -pipe -mmacosx-version-min=10.11" CGO_LDFLAGS="-mmacosx-version-min=10.11" CGO_ENABLED=1 go build -trimpath -tags $(TAGS),$(DARWIN_ADD_TAGS) -ldflags="-w -s" -buildmode=c-shared -o $(BINDIR)/$(LIBNAME)-amd64.dylib ./custom
 macos-arm64:
-	env GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-O2 -g0 -pipe -mmacosx-version-min=10.11" CGO_LDFLAGS="-mmacosx-version-min=10.11" CGO_ENABLED=1 go build -trimpath -tags $(TAGS),$(IOS_ADD_TAGS) -ldflags="-w -s" -buildmode=c-shared -o $(BINDIR)/$(LIBNAME)-arm64.dylib ./custom
+	env GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-O2 -g0 -pipe -mmacosx-version-min=10.11" CGO_LDFLAGS="-mmacosx-version-min=10.11" CGO_ENABLED=1 go build -trimpath -tags $(TAGS),$(DARWIN_ADD_TAGS) -ldflags="-w -s" -buildmode=c-shared -o $(BINDIR)/$(LIBNAME)-arm64.dylib ./custom
 macos-universal: macos-amd64 macos-arm64 
 	lipo -create $(BINDIR)/$(LIBNAME)-amd64.dylib $(BINDIR)/$(LIBNAME)-arm64.dylib -output $(BINDIR)/$(LIBNAME).dylib
 

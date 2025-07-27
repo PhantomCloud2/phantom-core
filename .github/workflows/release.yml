@@ -91,7 +91,7 @@ jobs:
         run: |
           tree 
           rm -f /*.h */*.h
-          files=$(ls | grep -E '^(libcore\.(dll|so|dylib|aar|a)|Libcore.xcframework|lib)$')
+          files=$(ls | grep -E '^(libcore(-amd64|-arm64)?\.(dll|so|dylib|aar|a)|Libcore.xcframework|lib)$')
           echo tar -czvf ${{ matrix.job.name }}.tar.gz  $files
           tar -czvf ${{ matrix.job.name }}.tar.gz  $files
 
