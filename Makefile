@@ -23,7 +23,7 @@ headers:
 	go build -buildmode=c-archive -o $(BINDIR)/$(LIBNAME).h ./custom
 
 android: lib_install
-	gomobile bind -v -androidapi=21 -javapkg=io.nekohasekai -libname=box -tags=$(TAGS) -trimpath -buildvcs=false -ldflags="-w -s" -target=android -o $(BINDIR)/$(LIBNAME).aar github.com/sagernet/sing-box/experimental/libbox
+	gomobile bind -v -androidapi=21 -javapkg=io.nekohasekai -libname=box -tags=$(TAGS) -trimpath -buildvcs=false -ldflags="-w -s -checklinkname=0" -target=android -o $(BINDIR)/$(LIBNAME).aar github.com/sagernet/sing-box/experimental/libbox
 
 ios-full: lib_install
 	gomobile bind -v -target ios,tvos,macos -libname=box -tags=$(TAGS),$(IOS_ADD_TAGS) -trimpath -buildvcs=false -ldflags="-w -s" -o $(BINDIR)/$(PRODUCT_NAME).xcframework github.com/sagernet/sing-box/experimental/libbox

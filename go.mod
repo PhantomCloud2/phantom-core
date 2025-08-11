@@ -1,10 +1,10 @@
 module github.com/phantomcloude/phantom-core
 
-go 1.24.5
+go 1.24.6
 
 require (
 	github.com/sagernet/gomobile v0.1.7
-	github.com/sagernet/sing v0.7.0-beta.2
+	github.com/sagernet/sing v0.7.5
 	github.com/sagernet/sing-box v1.11.13
 	github.com/sagernet/sing-tun v0.7.0-beta.1
 	google.golang.org/grpc v1.73.0
