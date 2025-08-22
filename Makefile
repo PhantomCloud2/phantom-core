@@ -18,7 +18,8 @@ GOMODCACHE=$(shell go env GOMODCACHE)
 SING_PACKAGES=$(shell ls $(GOMODCACHE)/github.com/sagernet 2>/dev/null | grep '^sing-' | sort -u)
 TRIMPATH_REPLACEMENTS=$(shell echo '$(SING_PACKAGES)' | tr ' ' '\n' | sed 's|^sing-\(.*\)$$|$(GOMODCACHE)/github.com/sagernet/sing-\1=>phantom-\1|' | tr '\n' ';' | sed 's|;$$||')
 
-GOBUILD_FLAGS=-trimpath -ldflags="-w -s -buildid=" -buildvcs=false -gcflags=all=-trimpath="$(go env GOMODCACHE)/github.com/sagernet=>phantom-internal;$(TRIMPATH_REPLACEMENTS)" -asmflags=all=-trimpath="$(go env GOMODCACHE)/github.com/sagernet=>phantom-internal;$(TRIMPATH_REPLACEMENTS)"
+COMMON_FLAGS=-trimpath -ldflags="-w -s -buildid=" -buildvcs=false -gcflags=all=-trimpath="$(go env GOMODCACHE)/github.com/sagernet=>phantom-internal;$(TRIMPATH_REPLACEMENTS)"
+GOBUILD_FLAGS=$(COMMON_FLAGS) -asmflags=all=-trimpath="$(go env GOMODCACHE)/github.com/sagernet=>phantom-internal;$(TRIMPATH_REPLACEMENTS)"
 GOBUILDLIB=CGO_ENABLED=1 CGO_CFLAGS="-O2 -g0 -pipe" CGO_CXXFLAGS="-O2 -g0 -pipe" CGO_LDFLAGS="-s" go build -buildmode=c-shared -tags $(TAGS) $(GOBUILD_FLAGS)
 
 mod_download:
@@ -32,15 +33,15 @@ headers: mod_download
 	go build -buildmode=c-archive -o $(BINDIR)/$(LIBNAME).h ./custom
 
 android: lib_install
-	gomobile bind -v -androidapi=21 -javapkg=io.nekohasekai -libname=box -tags=$(TAGS) -trimpath -buildvcs=false $(GOBUILD_FLAGS) -ldflags="-w -s -buildid= -checklinkname=0" -target=android -o $(BINDIR)/$(LIBNAME).aar github.com/sagernet/sing-box/experimental/libbox
+	gomobile bind -v -androidapi=21 -javapkg=io.nekohasekai -libname=box -tags=$(TAGS) -trimpath -buildvcs=false $(COMMON_FLAGS) -ldflags="-w -s -buildid= -checklinkname=0" -target=android -o $(BINDIR)/$(LIBNAME).aar github.com/sagernet/sing-box/experimental/libbox
 
 ios-full: lib_install
-	gomobile bind -v -target ios,tvos,macos -libname=box -tags=$(TAGS),$(IOS_ADD_TAGS) -trimpath -buildvcs=false $(GOBUILD_FLAGS) -o $(BINDIR)/$(PRODUCT_NAME).xcframework github.com/sagernet/sing-box/experimental/libbox
+	gomobile bind -v -target ios,tvos,macos -libname=box -tags=$(TAGS),$(IOS_ADD_TAGS) -trimpath -buildvcs=false $(COMMON_FLAGS) -o $(BINDIR)/$(PRODUCT_NAME).xcframework github.com/sagernet/sing-box/experimental/libbox
 	mv $(BINDIR)/$(PRODUCT_NAME).xcframework $(BINDIR)/$(LIBNAME).xcframework 
 	cp Libcore.podspec $(BINDIR)/$(LIBNAME).xcframework/
 
 ios: lib_install
-	gomobile bind -v -target ios -libname=box -tags=$(TAGS),$(IOS_ADD_TAGS) -trimpath -buildvcs=false $(GOBUILD_FLAGS) -o $(BINDIR)/Libcore.xcframework github.com/sagernet/sing-box/experimental/libbox
+	gomobile bind -v -target ios -libname=box -tags=$(TAGS),$(IOS_ADD_TAGS) -trimpath -buildvcs=false $(COMMON_FLAGS) -o $(BINDIR)/Libcore.xcframework github.com/sagernet/sing-box/experimental/libbox
 	cp Info.plist $(BINDIR)/Libcore.xcframework/
 
 .PHONY: build
