@@ -1,10 +1,10 @@
 module github.com/phantomcloude/phantom-core
 
-go 1.24.6
+go 1.25.0
 
 require (
-	github.com/sagernet/gomobile v0.1.7
-	github.com/sagernet/sing v0.7.5
+	github.com/sagernet/gomobile v0.1.8
+	github.com/sagernet/sing v0.7.6-0.20250815070458-d33ece7a184f
 	github.com/sagernet/sing-box v1.11.13
 	github.com/sagernet/sing-tun v0.7.0-beta.1
 	google.golang.org/grpc v1.73.0
@@ -40,7 +40,7 @@ require (
 	github.com/mdlayher/netlink v1.7.3-0.20250113171957-fbb4dce95f42 // indirect
 	github.com/mdlayher/sdnotify v1.0.0 // indirect
 	github.com/mdlayher/socket v0.5.1 // indirect
-	github.com/metacubex/tfo-go v0.0.0-20241231083714-66613d49c422 // indirect
+	github.com/metacubex/tfo-go v0.0.0-20250516165257-e29c16ae41d4 // indirect
 	github.com/metacubex/utls v1.8.0 // indirect
 	github.com/mholt/acmez/v3 v3.1.2 // indirect
 	github.com/mitchellh/go-ps v1.0.0 // indirect
@@ -61,7 +61,7 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	go.uber.org/zap/exp v0.3.0 // indirect
 	go4.org/mem v0.0.0-20240501181205-ae6ca9944745 // indirect
-	golang.org/x/term v0.33.0 // indirect
+	golang.org/x/term v0.34.0 // indirect
 	golang.zx2c4.com/wintun v0.0.0-20230126152724-0fa3db229ce2 // indirect
 	golang.zx2c4.com/wireguard/windows v0.5.3 // indirect
 )
@@ -97,12 +97,12 @@ require (
 	github.com/sagernet/gvisor v0.0.0-20250325023245-7a9c0f5725fb // indirect
 	github.com/sagernet/netlink v0.0.0-20240612041022-b9a21c07ac6a // indirect
 	github.com/sagernet/quic-go v0.52.0-beta.1 // indirect
-	github.com/sagernet/sing-mux v0.3.2 // indirect
-	github.com/sagernet/sing-quic v0.5.0-beta.3 // indirect
+	github.com/sagernet/sing-mux v0.3.3 // indirect
+	github.com/sagernet/sing-quic v0.5.0 // indirect
 	github.com/sagernet/sing-shadowsocks v0.2.8 // indirect
 	github.com/sagernet/sing-shadowsocks2 v0.2.1 // indirect
 	github.com/sagernet/sing-shadowtls v0.2.1-0.20250503051639-fcd445d33c11 // indirect
-	github.com/sagernet/sing-vmess v0.2.6 // indirect
+	github.com/sagernet/sing-vmess v0.2.7 // indirect
 	github.com/sagernet/smux v1.5.34-mod.2 // indirect
 	github.com/sagernet/wireguard-go v0.0.1-beta.7 // indirect
 	github.com/sagernet/ws v0.0.0-20231204124109-acfe8907c854 // indirect
@@ -114,15 +114,15 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba // indirect
-	golang.org/x/crypto v0.40.0 // indirect
+	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6 // indirect
-	golang.org/x/mod v0.26.0 // indirect
-	golang.org/x/net v0.42.0 // indirect
+	golang.org/x/mod v0.27.0 // indirect
+	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.34.0 // indirect
-	golang.org/x/text v0.27.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
-	golang.org/x/tools v0.34.0 // indirect
+	golang.org/x/tools v0.36.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250324211829-b45e905df463 // indirect
 	lukechampine.com/blake3 v1.3.0 // indirect
 )

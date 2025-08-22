@@ -15,7 +15,7 @@ require (
 	github.com/libdns/alidns v1.0.5-libdns.v1.beta1
 	github.com/libdns/cloudflare v0.2.2-0.20250708034226-c574dccb31a6
 	github.com/logrusorgru/aurora v2.0.3+incompatible
-	github.com/metacubex/tfo-go v0.0.0-20241231083714-66613d49c422
+	github.com/metacubex/tfo-go v0.0.0-20250516165257-e29c16ae41d4
 	github.com/metacubex/utls v1.8.0
 	github.com/mholt/acmez/v3 v3.1.2
 	github.com/miekg/dns v1.1.67
@@ -24,17 +24,17 @@ require (
 	github.com/sagernet/bbolt v0.0.0-20231014093535-ea5cb2fe9f0a
 	github.com/sagernet/cors v1.2.1
 	github.com/sagernet/fswatch v0.1.1
-	github.com/sagernet/gomobile v0.1.7
+	github.com/sagernet/gomobile v0.1.8
 	github.com/sagernet/gvisor v0.0.0-20250325023245-7a9c0f5725fb
 	github.com/sagernet/quic-go v0.52.0-beta.1
-	github.com/sagernet/sing v0.7.5
-	github.com/sagernet/sing-mux v0.3.2
-	github.com/sagernet/sing-quic v0.5.0-beta.3
+	github.com/sagernet/sing v0.7.6-0.20250815070458-d33ece7a184f
+	github.com/sagernet/sing-mux v0.3.3
+	github.com/sagernet/sing-quic v0.5.0
 	github.com/sagernet/sing-shadowsocks v0.2.8
 	github.com/sagernet/sing-shadowsocks2 v0.2.1
 	github.com/sagernet/sing-shadowtls v0.2.1-0.20250503051639-fcd445d33c11
 	github.com/sagernet/sing-tun v0.7.0-beta.1
-	github.com/sagernet/sing-vmess v0.2.6
+	github.com/sagernet/sing-vmess v0.2.7
 	github.com/sagernet/smux v1.5.34-mod.2
 	github.com/sagernet/tailscale v1.80.3-mod.5
 	github.com/sagernet/wireguard-go v0.0.1-beta.7
@@ -45,11 +45,11 @@ require (
 	github.com/zijiren233/gwst v0.4.8
 	go.uber.org/zap v1.27.0
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba
-	golang.org/x/crypto v0.40.0
+	golang.org/x/crypto v0.41.0
 	golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6
-	golang.org/x/mod v0.26.0
-	golang.org/x/net v0.42.0
-	golang.org/x/sys v0.34.0
+	golang.org/x/mod v0.27.0
+	golang.org/x/net v0.43.0
+	golang.org/x/sys v0.35.0
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20241231184526-a9ab2273dd10
 	google.golang.org/grpc v1.73.0
 	google.golang.org/protobuf v1.36.6
@@ -63,10 +63,11 @@ require (
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/akutz/memconn v0.1.0 // indirect
 	github.com/alexbrainman/sspi v0.0.0-20231016080023-1a75b4708caa // indirect
-	github.com/andybalholm/brotli v1.1.0 // indirect
+	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/caddyserver/zerossl v0.1.3 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
+	github.com/cloudflare/circl v1.5.0 // indirect
 	github.com/coreos/go-iptables v0.7.1-0.20240112124308-65c67c9f46e6 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dblohm7/wingoes v0.0.0-20240119213807-a09d6be7affa // indirect
@@ -101,10 +102,12 @@ require (
 	github.com/mdlayher/sdnotify v1.0.0 // indirect
 	github.com/mdlayher/socket v0.5.1 // indirect
 	github.com/mitchellh/go-ps v1.0.0 // indirect
+	github.com/panjf2000/ants/v2 v2.10.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus-community/pro-bing v0.4.0 // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
+	github.com/refraction-networking/utls v1.6.7 // indirect
 	github.com/safchain/ethtool v0.3.0 // indirect
 	github.com/sagernet/netlink v0.0.0-20240612041022-b9a21c07ac6a // indirect
 	github.com/sagernet/nftables v0.3.0-beta.4 // indirect
@@ -120,14 +123,15 @@ require (
 	github.com/u-root/uio v0.0.0-20240224005618-d2acac8f3701 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
+	github.com/zijiren233/gencontainer v0.0.0-20241030052007-1f7025eb92f5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap/exp v0.3.0 // indirect
 	go4.org/mem v0.0.0-20240501181205-ae6ca9944745 // indirect
 	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/term v0.33.0 // indirect
-	golang.org/x/text v0.27.0 // indirect
+	golang.org/x/term v0.34.0 // indirect
+	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
-	golang.org/x/tools v0.34.0 // indirect
+	golang.org/x/tools v0.36.0 // indirect
 	golang.zx2c4.com/wintun v0.0.0-20230126152724-0fa3db229ce2 // indirect
 	golang.zx2c4.com/wireguard/windows v0.5.3 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250324211829-b45e905df463 // indirect

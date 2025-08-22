@@ -2,7 +2,7 @@
 
 set -e
 
-current=v1.12.1
+current=v1.12.3
 next=$1
 
 if [ -z "$next" ]; then
