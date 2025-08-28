@@ -48,7 +48,7 @@ jobs:
 
       - name: Patch module
         run: |
-          bash patch-module.sh
+          sudo bash patch-module.sh
 
       - name: Setup Go
         uses: actions/setup-go@v5
