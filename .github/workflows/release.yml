@@ -46,15 +46,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Patch module
-        run: |
-          bash patch-module.sh
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version-file: "go.mod"
           check-latest: false
+
+      - name: Patch module
+        run: |
+          bash patch-module.sh
 
       - name: Setup Java
         if: startsWith(matrix.job.target,'android')
