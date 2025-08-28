@@ -5,7 +5,7 @@ set -e
 if command -v gsed &> /dev/null; then
     SED_CMD="gsed"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    brew install -y gnu-sed
+    brew install gnu-sed
     SED_CMD="gsed"
 else
     SED_CMD="sed -i"
