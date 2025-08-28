@@ -19,10 +19,10 @@ diff_content="$(curl -H 'Accept: application/vnd.github.v3.diff' \
     "https://github.com/SagerNet/sing-box/compare/${current}...${next}.diff")"
 
 echo "$diff_content" | git apply \
-    --exclude 'sing-box/clients/*' \
+    --exclude 'core/clients/*' \
     -C1 \
     --directory \
-    sing-box
+    core
 
 if [ $? -eq 0 ]; then
     SCRIPT_PATH="$0"
