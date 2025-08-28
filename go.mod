@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/sagernet/gomobile v0.1.8
-	github.com/sagernet/sing v0.7.6-0.20250815070458-d33ece7a184f
+	github.com/sagernet/sing v0.7.6-0.20250825114712-2aeec120ce28
 	github.com/sagernet/sing-box v0.0.0
 	github.com/sagernet/sing-tun v0.7.0-beta.1
 	google.golang.org/grpc v1.73.0
@@ -49,7 +49,7 @@ require (
 	github.com/sagernet/cors v1.2.1 // indirect
 	github.com/sagernet/fswatch v0.1.1 // indirect
 	github.com/sagernet/nftables v0.3.0-beta.4 // indirect
-	github.com/sagernet/tailscale v1.80.3-mod.5 // indirect
+	github.com/sagernet/tailscale v1.80.3-sing-box-1.12-mod.1 // indirect
 	github.com/tailscale/certstore v0.1.1-0.20231202035212-d3fa0460f47e // indirect
 	github.com/tailscale/go-winio v0.0.0-20231025203758-c4f33415bf55 // indirect
 	github.com/tailscale/golang-x-crypto v0.0.0-20240604161659-3fde5e568aa4 // indirect
