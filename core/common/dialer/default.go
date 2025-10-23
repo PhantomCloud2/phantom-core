@@ -239,15 +239,16 @@ func NewDefault(ctx context.Context, options option.DialerOptions) (*DefaultDial
 		fallbackNetworkType:    fallbackNetworkType,
 		networkFallbackDelay:   networkFallbackDelay,
 
-		wsDialer: newWsDialer(options.WsTunnel),
+		wsDialer: newWsDialer(options.WsTunnel, &dialer),
 	}, nil
 }
 
-func newWsDialer(options option.WsTunnel) *ws.Dialer {
+func newWsDialer(options option.WsTunnel, dialer *net.Dialer) *ws.Dialer {
 	if !options.Enabled {
 		return nil
 	}
 	return ws.NewDialer(
+		ws.WithDialer(dialer),
 		ws.WithHost(options.Host),
 		ws.WithPath(options.Path),
 		ws.WithKey(options.Key),
