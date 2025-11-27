@@ -103,7 +103,6 @@ func NewDefault(ctx context.Context, options option.DialerOptions) (*DefaultDial
 
 	if networkManager != nil {
 		defaultOptions := networkManager.DefaultOptions()
-		if !disableDefaultBind {
 			if defaultOptions.BindInterface != "" {
 				bindFunc := control.BindToInterface(
 					networkManager.InterfaceFinder(),
@@ -112,7 +111,7 @@ func NewDefault(ctx context.Context, options option.DialerOptions) (*DefaultDial
 				)
 				dialer.Control = control.Append(dialer.Control, bindFunc)
 				listener.Control = control.Append(listener.Control, bindFunc)
-			} else if networkManager.AutoDetectInterface() {
+			} else if networkManager.AutoDetectInterface() && !disableDefaultBind {
 				if platformInterface != nil {
 					networkStrategy = (*C.NetworkStrategy)(options.NetworkStrategy)
 					networkType = common.Map(options.NetworkType, option.InterfaceType.Build)
@@ -149,7 +148,6 @@ func NewDefault(ctx context.Context, options option.DialerOptions) (*DefaultDial
 					setMarkWrapper(networkManager, defaultOptions.RoutingMark, true),
 				)
 			}
-		}
 	}
 	if networkManager != nil {
 		markFunc := networkManager.AutoRedirectOutputMarkFunc()
