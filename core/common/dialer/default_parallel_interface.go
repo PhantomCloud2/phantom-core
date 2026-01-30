@@ -14,7 +14,7 @@ import (
 	"github.com/zijiren233/gwst/ws"
 )
 
-func (d *DefaultDialer) dialParallelInterface(ctx context.Context, network string, addr string, strategy C.NetworkStrategy, interfaceType []C.InterfaceType, fallbackInterfaceType []C.InterfaceType, fallbackDelay time.Duration) (net.Conn, bool, error) {
+func (d *DefaultDialer) dialParallelInterface(ctx context.Context, dialer net.Dialer, network string, addr string, strategy C.NetworkStrategy, interfaceType []C.InterfaceType, fallbackInterfaceType []C.InterfaceType, fallbackDelay time.Duration) (net.Conn, bool, error) {
 	primaryInterfaces, fallbackInterfaces := selectInterfaces(d.networkManager, strategy, interfaceType, fallbackInterfaceType)
 	if len(primaryInterfaces)+len(fallbackInterfaces) == 0 {
 		return nil, false, E.New("no available network interface")
@@ -48,12 +48,8 @@ func (d *DefaultDialer) dialParallelInterface(ctx context.Context, network strin
 				conn, err = d.wsDialer.DialContextTCP(ctx, ws.WithAddr(addr), ws.WithDialer(&perNetDialer))
 			}
 		} else {
-			var perNetDialer net.Dialer
-			if N.NetworkName(network) == N.NetworkTCP {
-				perNetDialer = dialerFromTCPDialer(d.dialer4)
-			} else {
-				perNetDialer = d.udpDialer4
-			}
+		
+			perNetDialer := dialer
 			if defaultInterface == nil || iif.Index != defaultInterface.Index {
 				perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
 			}
@@ -111,7 +107,7 @@ func (d *DefaultDialer) dialParallelInterface(ctx context.Context, network strin
 	}
 }
 
-func (d *DefaultDialer) dialParallelInterfaceFastFallback(ctx context.Context, network string, addr string, strategy C.NetworkStrategy, interfaceType []C.InterfaceType, fallbackInterfaceType []C.InterfaceType, fallbackDelay time.Duration, resetFastFallback func(time.Time)) (net.Conn, bool, error) {
+func (d *DefaultDialer) dialParallelInterfaceFastFallback(ctx context.Context, dialer net.Dialer, network string, addr string, strategy C.NetworkStrategy, interfaceType []C.InterfaceType, fallbackInterfaceType []C.InterfaceType, fallbackDelay time.Duration, resetFastFallback func(time.Time)) (net.Conn, bool, error) {
 	primaryInterfaces, fallbackInterfaces := selectInterfaces(d.networkManager, strategy, interfaceType, fallbackInterfaceType)
 	if len(primaryInterfaces)+len(fallbackInterfaces) == 0 {
 		return nil, false, E.New("no available network interface")
@@ -146,12 +142,8 @@ func (d *DefaultDialer) dialParallelInterfaceFastFallback(ctx context.Context, n
 				conn, err = d.wsDialer.DialContextTCP(ctx, ws.WithAddr(addr), ws.WithDialer(&perNetDialer))
 			}
 		} else {
-			var perNetDialer net.Dialer
-			if N.NetworkName(network) == N.NetworkTCP {
-				perNetDialer = dialerFromTCPDialer(d.dialer4)
-			} else {
-				perNetDialer = d.udpDialer4
-			}
+		
+			perNetDialer := dialer
 			if defaultInterface == nil || iif.Index != defaultInterface.Index {
 				perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
 			}
