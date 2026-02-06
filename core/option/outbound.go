@@ -84,23 +84,26 @@ type DialerOptions struct {
 	FallbackNetworkType badoption.Listable[InterfaceType] `json:"fallback_network_type,omitempty"`
 	FallbackDelay       badoption.Duration                `json:"fallback_delay,omitempty"`
 
-	WsTunnel WsTunnel `json:"ws_tunnel,omitempty"`
+	Tunnel Tunnel `json:"tunnel,omitempty"`
 
 	// Deprecated: migrated to domain resolver
 	DomainStrategy DomainStrategy `json:"domain_strategy,omitempty"`
 }
 
-type WsTunnel struct {
-	Enabled bool `json:"enabled,omitempty"`
+// Tunnel is a generic tunnel configuration supporting multiple transport protocols
+type Tunnel struct {
+	Enabled   bool   `json:"enabled,omitempty"`
+	Transport string `json:"transport,omitempty"` // "websocket" (default), "tcp", or "quic"
 
 	LoadBalance bool `json:"load_balance,omitempty"`
 
 	FallbackAddrs []string `json:"fallback_addrs,omitempty"`
 
 	Host string `json:"host,omitempty"`
-	Path string `json:"path,omitempty"`
+	Path string `json:"path,omitempty"` // For WebSocket transport only
 
-	Key string `json:"key,omitempty"`
+	Key           string `json:"key,omitempty"`            // For authentication
+	EncryptionKey string `json:"encryption_key,omitempty"` // For encryption
 
 	TLS        bool   `json:"tls,omitempty"`
 	ServerName string `json:"server_name,omitempty"`

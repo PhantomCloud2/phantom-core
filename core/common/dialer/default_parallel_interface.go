@@ -11,7 +11,7 @@ import (
 	"github.com/sagernet/sing/common/control"
 	E "github.com/sagernet/sing/common/exceptions"
 	N "github.com/sagernet/sing/common/network"
-	"github.com/zijiren233/gwst/ws"
+	"github.com/zijiren233/gwst/compat"
 )
 
 func (d *DefaultDialer) dialParallelInterface(ctx context.Context, dialer net.Dialer, network string, addr string, strategy C.NetworkStrategy, interfaceType []C.InterfaceType, fallbackInterfaceType []C.InterfaceType, fallbackDelay time.Duration) (net.Conn, bool, error) {
@@ -36,19 +36,19 @@ func (d *DefaultDialer) dialParallelInterface(ctx context.Context, dialer net.Di
 			conn net.Conn
 			err  error
 		)
-		if d.wsDialer != nil {
+		if d.tunnelDialer != nil {
 			perNetDialer := dialerFromTCPDialer(d.dialer4)
 			if defaultInterface == nil || iif.Index != defaultInterface.Index {
 				perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
 			}
 			switch N.NetworkName(network) {
 			case N.NetworkUDP:
-				conn, err = d.wsDialer.DialContextUDP(ctx, ws.WithAddr(addr), ws.WithDialer(&perNetDialer))
+				conn, err = d.tunnelDialer.DialContextUDP(ctx, compat.WithAddr(addr), compat.WithDialer(&perNetDialer))
 			case N.NetworkTCP:
-				conn, err = d.wsDialer.DialContextTCP(ctx, ws.WithAddr(addr), ws.WithDialer(&perNetDialer))
+				conn, err = d.tunnelDialer.DialContextTCP(ctx, compat.WithAddr(addr), compat.WithDialer(&perNetDialer))
 			}
 		} else {
-		
+
 			perNetDialer := dialer
 			if defaultInterface == nil || iif.Index != defaultInterface.Index {
 				perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
@@ -130,26 +130,26 @@ func (d *DefaultDialer) dialParallelInterfaceFastFallback(ctx context.Context, d
 			conn net.Conn
 			err  error
 		)
-		if d.wsDialer != nil {
+		if d.tunnelDialer != nil {
 			perNetDialer := dialerFromTCPDialer(d.dialer4)
 			if defaultInterface == nil || iif.Index != defaultInterface.Index {
 				perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
 			}
 			switch N.NetworkName(network) {
 			case N.NetworkUDP:
-				conn, err = d.wsDialer.DialContextUDP(ctx, ws.WithAddr(addr), ws.WithDialer(&perNetDialer))
+				conn, err = d.tunnelDialer.DialContextUDP(ctx, compat.WithAddr(addr), compat.WithDialer(&perNetDialer))
 			case N.NetworkTCP:
-				conn, err = d.wsDialer.DialContextTCP(ctx, ws.WithAddr(addr), ws.WithDialer(&perNetDialer))
+				conn, err = d.tunnelDialer.DialContextTCP(ctx, compat.WithAddr(addr), compat.WithDialer(&perNetDialer))
 			}
 		} else {
-		
+
 			perNetDialer := dialer
 			if defaultInterface == nil || iif.Index != defaultInterface.Index {
 				perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
 			}
 			conn, err = perNetDialer.DialContext(ctx, network, addr)
 		}
-		
+
 		if err != nil {
 			select {
 			case results <- dialResult{error: E.Cause(err, "dial ", iif.Name, " (", iif.Index, ")"), primary: primary}:
