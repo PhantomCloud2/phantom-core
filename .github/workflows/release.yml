@@ -86,10 +86,10 @@ jobs:
 
       - name: Build
         run: |
+          if [[ "${{ matrix.job.target }}" == "android" ]]; then
+            export CGO_CFLAGS="-I${ANDROID_NDK_HOME}/sources/android/cpufeatures"
+          fi
           make -j$(($(nproc) + 1)) ${{ matrix.job.target }}
-        env:
-          ANDROID_HOME: ${{ steps.setup-ndk.outputs.android-sdk-path }}
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: zip
         working-directory: bin
