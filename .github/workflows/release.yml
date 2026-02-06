@@ -87,6 +87,8 @@ jobs:
       - name: Build
         run: |
           make -j$(($(nproc) + 1)) ${{ matrix.job.target }}
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: zip
         working-directory: bin
