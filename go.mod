@@ -72,6 +72,7 @@ require (
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/caddyserver/certmagic v0.23.0 // indirect
 	github.com/cretz/bine v0.2.0 // indirect
+	github.com/enfein/mieru/v3 v3.27.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-chi/chi/v5 v5.2.2 // indirect
 	github.com/go-chi/render v1.0.3 // indirect
