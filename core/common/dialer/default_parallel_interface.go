@@ -37,7 +37,7 @@ func (d *DefaultDialer) dialParallelInterface(ctx context.Context, dialer net.Di
 			err  error
 		)
 		if d.tunnelDialer != nil {
-			perNetDialer := dialerFromTCPDialer(d.dialer4)
+			perNetDialer := d.dialer4.Dialer
 			if defaultInterface == nil || iif.Index != defaultInterface.Index {
 				perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
 			}
@@ -131,7 +131,7 @@ func (d *DefaultDialer) dialParallelInterfaceFastFallback(ctx context.Context, d
 			err  error
 		)
 		if d.tunnelDialer != nil {
-			perNetDialer := dialerFromTCPDialer(d.dialer4)
+			perNetDialer := d.dialer4.Dialer
 			if defaultInterface == nil || iif.Index != defaultInterface.Index {
 				perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
 			}
