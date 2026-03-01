@@ -1,14 +1,15 @@
-name: Release
+name: CI
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+      - dev
     paths-ignore:
       - "**.md"
       - "docs/**"
       - ".github/**"
-      - "!.github/workflows/release.yml"
+      - "!.github/workflows/ci.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,5 +22,5 @@ jobs:
     permissions: write-all
     with:
       upload-artifact: true
-      tag-name: ${{ github.ref_name }}
-      is-release: true
+      tag-name: "draft"
+      is-release: false

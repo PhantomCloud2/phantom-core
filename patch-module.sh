@@ -17,7 +17,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     fi
 else
     if ! command -v protoc &> /dev/null; then
-        sudo apt install -y protobuf-compiler
+        sudo apt-get update
+        sudo apt-get install -y protobuf-compiler
     fi
 fi
 
