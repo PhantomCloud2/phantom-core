@@ -11,6 +11,7 @@ import (
 	B "github.com/sagernet/sing-box"
 	"github.com/sagernet/sing-box/common/urltest"
 	"github.com/sagernet/sing-box/experimental/libbox"
+	"github.com/sagernet/sing-box/include"
 	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing-box/option"
 	E "github.com/sagernet/sing/common/exceptions"
@@ -30,13 +31,16 @@ var (
 func Setup(basePath, workingPath, tempPath string, statusPort int64, debug bool) error {
 	statusPropagationPort = statusPort
 
-	err := libbox.Setup(&libbox.SetupOptions{
+	setupOpts := &libbox.SetupOptions{
 		BasePath:    basePath,
 		WorkingPath: workingPath,
 		TempPath:    tempPath,
-		// use tcp conn when running on windows or tvos
-		IsTVOS: runtime.GOOS == "windows",
-	})
+	}
+	// Windows does not support Unix domain sockets; use TCP instead.
+	if runtime.GOOS == "windows" {
+		setupOpts.CommandServerListenPort = 8964
+	}
+	err := libbox.Setup(setupOpts)
 	if err != nil {
 		return err
 	}
@@ -73,11 +77,32 @@ func Setup(basePath, workingPath, tempPath string, statusPort int64, debug bool)
 	return err
 }
 
-func NewService(ctx context.Context, options option.Options) (*libbox.BoxService, error) {
+type BoxService struct {
+	cancel context.CancelFunc
+	box    *B.Box
+}
+
+func (s *BoxService) Start() error { return s.box.Start() }
+func (s *BoxService) Close() error { s.cancel(); return s.box.Close() }
+
+func createBaseContext() context.Context {
+	return B.Context(
+		filemanager.WithDefault(
+			context.Background(),
+			sWorkingPath, sTempPath, sUserID, sGroupID,
+		),
+		include.InboundRegistry(),
+		include.OutboundRegistry(),
+		include.EndpointRegistry(),
+		include.DNSTransportRegistry(),
+		include.ServiceRegistry(),
+	)
+}
+
+func NewService(ctx context.Context, options option.Options) (*BoxService, error) {
 	runtimeDebug.FreeOSMemory()
 
 	ctx, cancel := context.WithCancel(ctx)
-	ctx = filemanager.WithDefault(ctx, sWorkingPath, sTempPath, sUserID, sGroupID)
 	urlTestHistoryStorage := urltest.NewHistoryStorage()
 	ctx = service.ContextWithPtr(ctx, urlTestHistoryStorage)
 
@@ -92,14 +117,7 @@ func NewService(ctx context.Context, options option.Options) (*libbox.BoxService
 
 	runtimeDebug.FreeOSMemory()
 
-	service := libbox.NewBoxService(
-		ctx,
-		cancel,
-		instance,
-		urlTestHistoryStorage,
-	)
-
-	return &service, nil
+	return &BoxService{cancel: cancel, box: instance}, nil
 }
 
 func readOptions(ctx context.Context, configContent string) (option.Options, error) {

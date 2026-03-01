@@ -14,25 +14,25 @@ import (
 )
 
 var (
-	Box              *libbox.BoxService
-	coreLogFactory   log.Factory
-	useFlutterBridge bool = true
+	Box               *BoxService
+	lastConfigContent string
+	coreLogFactory    log.Factory
+	useFlutterBridge  bool = true
 )
 
 func StopAndAlert(msgType pb.MessageType, message string) {
 	SetCoreStatus(pb.CoreState_STOPPED, msgType, message)
 
-	if oldCommandServer != nil {
-		oldCommandServer.SetService(nil)
-	}
-
 	if Box != nil {
 		Box.Close()
 		Box = nil
+	} else if oldCommandServer != nil {
+		oldCommandServer.CloseService()
 	}
 
 	if oldCommandServer != nil {
 		oldCommandServer.Close()
+		oldCommandServer = nil
 	}
 
 	if useFlutterBridge {
@@ -83,7 +83,7 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Parsing Config")
 
-	ctx := libbox.BaseContext(nil)
+	ctx := createBaseContext()
 	parsedContent, err := readOptions(ctx, content)
 
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Parsed")
@@ -97,7 +97,7 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 		)
 		StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
 
-		return &resp, err
+		return resp, err
 	}
 
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Saving config")
@@ -115,8 +115,28 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 			)
 			StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
 
-			return &resp, err
+			return resp, err
 		}
+
+		// CommandServer manages the box lifecycle via daemon.StartedService,
+		// so that gRPC subscribers (Status, Groups) can receive live data.
+		Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Starting Service via CommandServer")
+
+		if in.GetDelayStart() {
+			<-time.After(250 * time.Millisecond)
+		}
+
+		err = oldCommandServer.StartOrReloadService(content, &libbox.OverrideOptions{})
+		if err != nil {
+			Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
+			resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_START_SERVICE, err.Error())
+			StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
+			return resp, err
+		}
+
+		lastConfigContent = content
+		resp := SetCoreStatus(pb.CoreState_STARTED, pb.MessageType_EMPTY, "")
+		return resp, nil
 	}
 
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Stating Service ")
@@ -126,7 +146,7 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 		Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
 		resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_CREATE_SERVICE, err.Error())
 		StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
-		return &resp, err
+		return resp, err
 	}
 
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Service.. started")
@@ -140,17 +160,14 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 		Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
 		resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_START_SERVICE, err.Error())
 		StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
-		return &resp, err
+		return resp, err
 	}
 
 	Box = instance
-	if in.GetEnableOldCommandServer() {
-		oldCommandServer.SetService(Box)
-	}
 
 	resp := SetCoreStatus(pb.CoreState_STARTED, pb.MessageType_EMPTY, "")
 
-	return &resp, nil
+	return resp, nil
 }
 
 func Stop() (*pb.CoreInfoResponse, error) {
@@ -169,7 +186,7 @@ func Stop() (*pb.CoreInfoResponse, error) {
 		}, errors.New("instance not started")
 	}
 
-	if Box == nil {
+	if Box == nil && oldCommandServer == nil {
 		return &pb.CoreInfoResponse{
 			CoreState:   CoreState,
 			MessageType: pb.MessageType_INSTANCE_NOT_FOUND,
@@ -180,35 +197,31 @@ func Stop() (*pb.CoreInfoResponse, error) {
 	SetCoreStatus(pb.CoreState_STOPPING, pb.MessageType_EMPTY, "")
 
 	if oldCommandServer != nil {
-		oldCommandServer.SetService(nil)
-	}
-
-	err := Box.Close()
-	if err != nil {
-		return &pb.CoreInfoResponse{
-			CoreState:   CoreState,
-			MessageType: pb.MessageType_UNEXPECTED_ERROR,
-			Message:     "Error while stopping the service",
-		}, errors.New("error while stopping the service")
-	}
-
-	Box = nil
-	if oldCommandServer != nil {
-		err = oldCommandServer.Close()
+		err := oldCommandServer.CloseService()
 		if err != nil {
 			return &pb.CoreInfoResponse{
 				CoreState:   CoreState,
 				MessageType: pb.MessageType_UNEXPECTED_ERROR,
-				Message:     "Error while Closing the comand server",
-			}, errors.New("error while Closing the comand server")
+				Message:     "Error while stopping the service",
+			}, errors.New("error while stopping the service")
 		}
-
+		oldCommandServer.Close()
 		oldCommandServer = nil
+	} else {
+		err := Box.Close()
+		if err != nil {
+			return &pb.CoreInfoResponse{
+				CoreState:   CoreState,
+				MessageType: pb.MessageType_UNEXPECTED_ERROR,
+				Message:     "Error while stopping the service",
+			}, errors.New("error while stopping the service")
+		}
+		Box = nil
 	}
 
 	resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_EMPTY, "")
 
-	return &resp, nil
+	return resp, nil
 }
 
 func Restart(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
@@ -227,7 +240,7 @@ func Restart(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 		}, errors.New("instance not started")
 	}
 
-	if Box == nil {
+	if Box == nil && oldCommandServer == nil {
 		return &pb.CoreInfoResponse{
 			CoreState:   CoreState,
 			MessageType: pb.MessageType_INSTANCE_NOT_FOUND,

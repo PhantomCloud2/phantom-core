@@ -16,12 +16,8 @@ type OldCommandClientHandler struct {
 	logger log.Logger
 }
 
-// WriteConnections implements libbox.CommandClientHandler.
-func (cch *OldCommandClientHandler) WriteConnections(message *libbox.Connections) {
-}
-
 // WriteLogs implements libbox.CommandClientHandler.
-func (cch *OldCommandClientHandler) WriteLogs(messageList libbox.StringIterator) {
+func (cch *OldCommandClientHandler) WriteLogs(messageList libbox.LogIterator) {
 }
 
 func (cch *OldCommandClientHandler) Connected() {
@@ -34,10 +30,6 @@ func (cch *OldCommandClientHandler) Disconnected(message string) {
 
 func (cch *OldCommandClientHandler) ClearLogs() {
 	cch.logger.Debug("clear logs")
-}
-
-func (cch *OldCommandClientHandler) WriteLog(message string) {
-	cch.logger.Debug("log: ", message)
 }
 
 func (cch *OldCommandClientHandler) WriteStatus(message *libbox.StatusMessage) {
@@ -116,6 +108,12 @@ func (cch *OldCommandClientHandler) InitializeClashMode(
 
 func (cch *OldCommandClientHandler) UpdateClashMode(newMode string) {
 	cch.logger.Debug("update clash mode: ", newMode)
+}
+
+func (cch *OldCommandClientHandler) SetDefaultLogLevel(level int32) {
+}
+
+func (cch *OldCommandClientHandler) WriteConnectionEvents(events *libbox.ConnectionEvents) {
 }
 
 type OutboundGroup struct {

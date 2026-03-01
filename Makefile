@@ -10,7 +10,7 @@ ifeq ($(OS),Windows_NT)
 Not available for Windows! use bash in WSL
 endif
 
-TAGS=with_gvisor,with_quic,with_utls,with_grpc,with_conntrack,with_clash_api
+TAGS=with_gvisor,with_quic,with_utls,with_grpc,with_conntrack,with_clash_api,with_naive_outbound
 IOS_ADD_TAGS=with_dhcp,with_low_memory
 DARWIN_ADD_TAGS=with_dhcp
 
@@ -53,10 +53,10 @@ linux-amd64: mod_download
 	env GOOS=linux GOARCH=amd64 $(GOBUILDLIB) -o $(BINDIR)/lib/$(LIBNAME).so ./custom
 
 macos-amd64: mod_download
-	env GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-O2 -g0 -pipe -mmacosx-version-min=10.11" CGO_LDFLAGS="-mmacosx-version-min=10.11" CGO_ENABLED=1 go build -tags $(TAGS),$(DARWIN_ADD_TAGS) $(GOBUILD_FLAGS) -buildmode=c-shared -o $(BINDIR)/$(LIBNAME)-amd64.dylib ./custom
+	env GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-O2 -g0 -pipe -mmacosx-version-min=12.0" CGO_LDFLAGS="-mmacosx-version-min=12.0" CGO_ENABLED=1 go build -tags $(TAGS),$(DARWIN_ADD_TAGS) $(GOBUILD_FLAGS) -buildmode=c-shared -o $(BINDIR)/$(LIBNAME)-amd64.dylib ./custom
 
 macos-arm64: mod_download
-	env GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-O2 -g0 -pipe -mmacosx-version-min=10.11" CGO_LDFLAGS="-mmacosx-version-min=10.11" CGO_ENABLED=1 go build -tags $(TAGS),$(DARWIN_ADD_TAGS) $(GOBUILD_FLAGS) -buildmode=c-shared -o $(BINDIR)/$(LIBNAME)-arm64.dylib ./custom
+	env GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-O2 -g0 -pipe -mmacosx-version-min=12.0" CGO_LDFLAGS="-mmacosx-version-min=12.0" CGO_ENABLED=1 go build -tags $(TAGS),$(DARWIN_ADD_TAGS) $(GOBUILD_FLAGS) -buildmode=c-shared -o $(BINDIR)/$(LIBNAME)-arm64.dylib ./custom
 
 macos-universal: macos-amd64 macos-arm64 
 	lipo -create $(BINDIR)/$(LIBNAME)-amd64.dylib $(BINDIR)/$(LIBNAME)-arm64.dylib -output $(BINDIR)/$(LIBNAME).dylib

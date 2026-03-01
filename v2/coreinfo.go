@@ -9,11 +9,11 @@ import (
 )
 
 var (
-	coreInfoObserver = NewObserver[pb.CoreInfoResponse](10)
+	coreInfoObserver = NewObserver[*pb.CoreInfoResponse](10)
 	CoreState        = pb.CoreState_STOPPED
 )
 
-func SetCoreStatus(state pb.CoreState, msgType pb.MessageType, message string) pb.CoreInfoResponse {
+func SetCoreStatus(state pb.CoreState, msgType pb.MessageType, message string) *pb.CoreInfoResponse {
 	msg := fmt.Sprintf("%s: %s %s", state.String(), msgType.String(), message)
 	if msgType == pb.MessageType_EMPTY {
 		msg = fmt.Sprintf("%s: %s", state.String(), message)
@@ -22,7 +22,7 @@ func SetCoreStatus(state pb.CoreState, msgType pb.MessageType, message string) p
 	Log(pb.LogLevel_INFO, pb.LogType_CORE, msg)
 
 	CoreState = state
-	info := pb.CoreInfoResponse{
+	info := &pb.CoreInfoResponse{
 		CoreState:   state,
 		MessageType: msgType,
 		Message:     message,
