@@ -52,7 +52,7 @@ func (csh *CommandServerHandler) ServiceStop() error {
 }
 
 func (csh *CommandServerHandler) WriteDebugMessage(message string) {
-	csh.logger.Trace("Debug message: ", message)
+	csh.logger.Trace(message)
 }
 
 func startCommandServer() error {

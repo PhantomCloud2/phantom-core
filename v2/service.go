@@ -35,6 +35,7 @@ func Setup(basePath, workingPath, tempPath string, statusPort int64, debug bool)
 		BasePath:    basePath,
 		WorkingPath: workingPath,
 		TempPath:    tempPath,
+		Debug:       debug,
 	}
 	// Windows does not support Unix domain sockets; use TCP instead.
 	if runtime.GOOS == "windows" {
