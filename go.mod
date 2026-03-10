@@ -4,9 +4,9 @@ go 1.25.0
 
 require (
 	github.com/sagernet/gomobile v0.1.12
-	github.com/sagernet/sing v0.8.0-beta.16.0.20260227013657-e419e9875a07
+	github.com/sagernet/sing v0.8.2
 	github.com/sagernet/sing-box v0.0.0
-	github.com/sagernet/sing-tun v0.8.0-beta.18
+	github.com/sagernet/sing-tun v0.8.2
 	google.golang.org/grpc v1.77.0
 	google.golang.org/protobuf v1.36.11
 )

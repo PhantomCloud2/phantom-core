@@ -44,14 +44,11 @@ type CommandServerHandler interface {
 
 func NewCommandServer(handler CommandServerHandler, platformInterface PlatformInterface) (*CommandServer, error) {
 	ctx := baseContext(platformInterface)
-	var platformWrapper *platformInterfaceWrapper
-	if platformInterface != nil {
-		platformWrapper = &platformInterfaceWrapper{
-			iif:       platformInterface,
-			useProcFS: platformInterface.UseProcFS(),
-		}
-		service.MustRegister[adapter.PlatformInterface](ctx, platformWrapper)
+	platformWrapper := &platformInterfaceWrapper{
+		iif:       platformInterface,
+		useProcFS: platformInterface.UseProcFS(),
 	}
+	service.MustRegister[adapter.PlatformInterface](ctx, platformWrapper)
 	server := &CommandServer{
 		handler:           handler,
 		platformInterface: platformInterface,

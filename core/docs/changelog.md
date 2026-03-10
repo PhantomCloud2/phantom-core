@@ -2,6 +2,18 @@
 icon: material/alert-decagram
 ---
 
+#### 1.13.2
+
+* Fixes and improvements
+
+#### 1.13.1
+
+* Fixes and improvements
+
+#### 1.12.14
+
+* Backport fixes
+
 #### 1.13.0
 
 Important changes since 1.12:
