@@ -38,8 +38,11 @@ func Setup(basePath, workingPath, tempPath string, statusPort int64, debug bool)
 		Debug:       debug,
 	}
 	// Windows does not support Unix domain sockets; use TCP instead.
+	// Pass 0 to let the OS assign a random available port; command_server.go
+	// writes the actual bound port back to sCommandServerListenPort so that
+	// CommandClient can connect to it within the same process.
 	if runtime.GOOS == "windows" {
-		setupOpts.CommandServerListenPort = 8964
+		setupOpts.CommandServerListenPort = 0
 	}
 	err := libbox.Setup(setupOpts)
 	if err != nil {

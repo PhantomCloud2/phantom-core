@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"syscall"
 	"time"
@@ -114,7 +115,7 @@ func (s *CommandServer) Start() error {
 		listener net.Listener
 		err      error
 	)
-	if sCommandServerListenPort == 0 {
+	if sCommandServerListenPort == 0 && runtime.GOOS != "windows" {
 		sockPath := filepath.Join(sBasePath, "command.sock")
 		os.Remove(sockPath)
 		for i := 0; i < 30; i++ {
@@ -146,6 +147,9 @@ func (s *CommandServer) Start() error {
 		if err != nil {
 			return E.Cause(err, "listen command server")
 		}
+		// Write back the actual bound port (important when sCommandServerListenPort == 0,
+		// i.e. the OS assigned a random port) so CommandClient can connect to the right port.
+		sCommandServerListenPort = uint16(listener.Addr().(*net.TCPAddr).Port)
 	}
 	s.listener = listener
 	serverOptions := []grpc.ServerOption{
