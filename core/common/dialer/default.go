@@ -221,17 +221,18 @@ func NewDefault(ctx context.Context, options option.DialerOptions) (*DefaultDial
 		fallbackNetworkType:    fallbackNetworkType,
 		networkFallbackDelay:   networkFallbackDelay,
 
-		tunnelDialer: newTunnelDialer(options.Tunnel, &dialer),
+		tunnelDialer: newTunnelDialer(options.Tunnel, &dialer, &listener),
 	}, nil
 }
 
-func newTunnelDialer(options option.Tunnel, dialer *net.Dialer) *compat.Dialer {
+func newTunnelDialer(options option.Tunnel, dialer *net.Dialer, listenConfig *net.ListenConfig) *compat.Dialer {
 	if !options.Enabled {
 		return nil
 	}
 
 	dialerOptions := []compat.ConnectOption{
 		compat.WithDialer(dialer),
+		compat.WithListenConfig(listenConfig),
 		compat.WithHost(options.Host),
 		compat.WithPath(options.Path),
 		compat.WithKey(options.Key),
