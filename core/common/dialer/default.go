@@ -10,6 +10,7 @@ import (
 
 	"github.com/sagernet/sing-box/adapter"
 	"github.com/sagernet/sing-box/common/listener"
+	"github.com/sagernet/sing-box/common/tlspreset"
 	C "github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing/common"
@@ -229,7 +230,11 @@ func newTunnelDialer(options option.Tunnel, dialer *net.Dialer, listenConfig *ne
 	if !options.Enabled {
 		return nil
 	}
+	return compat.NewDialer(buildTunnelDialerOptions(options, dialer, listenConfig)...)
+}
 
+
+func buildTunnelDialerOptions(options option.Tunnel, dialer *net.Dialer, listenConfig *net.ListenConfig) []compat.ConnectOption {
 	dialerOptions := []compat.ConnectOption{
 		compat.WithDialer(dialer),
 		compat.WithListenConfig(listenConfig),
@@ -249,8 +254,12 @@ func newTunnelDialer(options option.Tunnel, dialer *net.Dialer, listenConfig *ne
 	if options.EncryptionKey != "" {
 		dialerOptions = append(dialerOptions, compat.WithEncryptionKey(options.EncryptionKey))
 	}
-
-	return compat.NewDialer(dialerOptions...)
+	if options.TLS && !options.Insecure {
+		if pool, exists := tlspreset.CertPoolForServerName(options.ServerName); exists {
+			dialerOptions = append(dialerOptions, compat.WithCACertPool(pool))
+		}
+	}
+	return dialerOptions
 }
 
 func setMarkWrapper(networkManager adapter.NetworkManager, mark uint32, isDefault bool) control.Func {
