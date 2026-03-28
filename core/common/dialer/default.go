@@ -233,7 +233,6 @@ func newTunnelDialer(options option.Tunnel, dialer *net.Dialer, listenConfig *ne
 	return compat.NewDialer(buildTunnelDialerOptions(options, dialer, listenConfig)...)
 }
 
-
 func buildTunnelDialerOptions(options option.Tunnel, dialer *net.Dialer, listenConfig *net.ListenConfig) []compat.ConnectOption {
 	dialerOptions := []compat.ConnectOption{
 		compat.WithDialer(dialer),
@@ -251,8 +250,15 @@ func buildTunnelDialerOptions(options option.Tunnel, dialer *net.Dialer, listenC
 		compat.WithTransportType(options.Transport),
 	}
 
-	if options.EncryptionKey != "" {
-		dialerOptions = append(dialerOptions, compat.WithEncryptionKey(options.EncryptionKey))
+	if options.EncryptionKey != "" && options.EncryptionAlgo != "" {
+		switch options.EncryptionAlgo {
+		case "aegis-128l":
+			dialerOptions = append(dialerOptions, compat.WithEncryptionKey(options.EncryptionKey))
+		case "aegis-128x2":
+			dialerOptions = append(dialerOptions, compat.WithEncryptionKeyAndAlgo(options.EncryptionKey, "aegis-128x2"))
+		case "aegis-128x4":
+			dialerOptions = append(dialerOptions, compat.WithEncryptionKeyAndAlgo(options.EncryptionKey, "aegis-128x4"))
+		}
 	}
 	if options.TLS && !options.Insecure {
 		if pool, exists := tlspreset.CertPoolForServerName(options.ServerName); exists {

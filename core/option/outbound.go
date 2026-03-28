@@ -106,8 +106,9 @@ type Tunnel struct {
 	Host string `json:"host,omitempty"`
 	Path string `json:"path,omitempty"` // For WebSocket transport only
 
-	Key           string `json:"key,omitempty"`            // For authentication
-	EncryptionKey string `json:"encryption_key,omitempty"` // For encryption
+	Key            string `json:"key,omitempty"`             // For authentication
+	EncryptionKey  string `json:"encryption_key,omitempty"`  // For encryption
+	EncryptionAlgo string `json:"encryption_algo,omitempty"` // AEGIS variant: "aegis-128l", "aegis-128x2", "aegis-128x4"; empty/null disables encryption
 
 	TLS        bool   `json:"tls,omitempty"`
 	ServerName string `json:"server_name,omitempty"`

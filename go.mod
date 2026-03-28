@@ -167,5 +167,5 @@ require (
 
 replace (
 	github.com/sagernet/sing-box => ./core
-	github.com/zijiren233/gwst => github.com/Nanocloub/gwst v0.5.5-0.20260327133700-de5996f03ca2
+	github.com/zijiren233/gwst => github.com/Nanocloub/gwst v0.5.5-0.20260328124548-33952f2b9f3a
 )
