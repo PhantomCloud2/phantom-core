@@ -176,4 +176,4 @@ require (
 	lukechampine.com/blake3 v1.3.0 // indirect
 )
 
-replace github.com/zijiren233/gwst => github.com/Nanocloub/gwst v0.5.5-0.20260328124548-33952f2b9f3a
+replace github.com/zijiren233/gwst => github.com/Nanocloub/gwst v0.5.6-0.20260329053743-0dbf16ec280d
