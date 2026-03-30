@@ -146,7 +146,7 @@ require (
 	github.com/vishvananda/netns v0.0.5 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
 	github.com/zijiren233/gencontainer v0.0.0-20250117072502-9e882446f52f // indirect
-	github.com/zijiren233/gwst v0.4.11 // indirect
+	github.com/zijiren233/gwst v0.5.7 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba // indirect
@@ -167,5 +167,5 @@ require (
 
 replace (
 	github.com/sagernet/sing-box => ./core
-	github.com/zijiren233/gwst => github.com/Nanocloub/gwst v0.5.6-0.20260329053743-0dbf16ec280d
+	github.com/zijiren233/gwst => github.com/Nanocloub/gwst v0.5.7
 )

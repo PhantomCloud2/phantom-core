@@ -49,7 +49,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	github.com/vishvananda/netns v0.0.5
-	github.com/zijiren233/gwst v0.4.11
+	github.com/zijiren233/gwst v0.5.7
 	go.uber.org/zap v1.27.1
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba
 	golang.org/x/crypto v0.48.0
@@ -176,4 +176,4 @@ require (
 	lukechampine.com/blake3 v1.3.0 // indirect
 )
 
-replace github.com/zijiren233/gwst => github.com/Nanocloub/gwst v0.5.6-0.20260329053743-0dbf16ec280d
+replace github.com/zijiren233/gwst => github.com/Nanocloub/gwst v0.5.7
