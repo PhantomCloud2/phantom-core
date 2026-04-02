@@ -61,7 +61,7 @@ require (
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/anthropics/anthropic-sdk-go v1.26.0 // indirect
-	github.com/apernet/quic-go v0.59.1-0.20260217092621-db4786c77a22 // indirect
+	github.com/apernet/quic-go v0.59.1-0.20260330051153-c402ee641eb6 // indirect
 	github.com/caddyserver/certmagic v0.25.2 // indirect
 	github.com/cretz/bine v0.2.0 // indirect
 	github.com/database64128/netx-go v0.1.1 // indirect
@@ -146,7 +146,7 @@ require (
 	github.com/vishvananda/netns v0.0.5 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
 	github.com/zijiren233/gencontainer v0.0.0-20250117072502-9e882446f52f // indirect
-	github.com/zijiren233/gwst v0.5.7 // indirect
+	github.com/zijiren233/gwst v0.5.9-0.20260402142404-8473079ab393 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba // indirect
@@ -167,5 +167,5 @@ require (
 
 replace (
 	github.com/sagernet/sing-box => ./core
-	github.com/zijiren233/gwst => github.com/Nanocloub/gwst v0.5.7
+	github.com/zijiren233/gwst => github.com/Nanocloub/gwst v0.5.9-0.20260402161642-4800682e2d52
 )
