@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/sagernet/gomobile v0.1.12
-	github.com/sagernet/sing v0.8.3-0.20260315153529-ed51f65fbfde
+	github.com/sagernet/sing v0.8.3
 	github.com/sagernet/sing-box v0.0.0
 	github.com/sagernet/sing-tun v0.8.6
 	google.golang.org/grpc v1.79.1
@@ -67,7 +67,7 @@ require (
 	github.com/database64128/netx-go v0.1.1 // indirect
 	github.com/database64128/tfo-go/v2 v2.3.2 // indirect
 	github.com/ebitengine/purego v0.9.1 // indirect
-	github.com/enfein/mieru/v3 v3.29.0 // indirect
+	github.com/enfein/mieru/v3 v3.30.0 // indirect
 	github.com/florianl/go-nfqueue/v2 v2.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-chi/chi/v5 v5.2.5 // indirect
@@ -130,7 +130,7 @@ require (
 	github.com/sagernet/netlink v0.0.0-20240612041022-b9a21c07ac6a // indirect
 	github.com/sagernet/quic-go v0.59.0-sing-box-mod.4 // indirect
 	github.com/sagernet/sing-mux v0.3.4 // indirect
-	github.com/sagernet/sing-quic v0.6.0 // indirect
+	github.com/sagernet/sing-quic v0.6.1 // indirect
 	github.com/sagernet/sing-shadowsocks v0.2.8 // indirect
 	github.com/sagernet/sing-shadowsocks2 v0.2.1 // indirect
 	github.com/sagernet/sing-shadowtls v0.2.1-0.20250503051639-fcd445d33c11 // indirect
