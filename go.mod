@@ -4,9 +4,9 @@ go 1.25.0
 
 require (
 	github.com/sagernet/gomobile v0.1.12
-	github.com/sagernet/sing v0.8.3
+	github.com/sagernet/sing v0.8.4
 	github.com/sagernet/sing-box v0.0.0
-	github.com/sagernet/sing-tun v0.8.6
+	github.com/sagernet/sing-tun v0.8.7
 	google.golang.org/grpc v1.79.1
 	google.golang.org/protobuf v1.36.11
 )
@@ -67,7 +67,7 @@ require (
 	github.com/database64128/netx-go v0.1.1 // indirect
 	github.com/database64128/tfo-go/v2 v2.3.2 // indirect
 	github.com/ebitengine/purego v0.9.1 // indirect
-	github.com/enfein/mieru/v3 v3.30.0 // indirect
+	github.com/enfein/mieru/v3 v3.30.2-0.20260412222650-aa510b4a3715 // indirect
 	github.com/florianl/go-nfqueue/v2 v2.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-chi/chi/v5 v5.2.5 // indirect
