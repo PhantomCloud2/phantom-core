@@ -296,11 +296,18 @@ func buildMieruServerConfig(_ context.Context, options option.MieruInboundOption
 	}
 	var trafficPattern *mierupb.TrafficPattern
 	trafficPattern, _ = mierutp.Decode(options.TrafficPattern)
+	var advancedSettings *mierupb.ServerAdvancedSettings
+	if options.UserHintIsMandatory {
+		advancedSettings = &mierupb.ServerAdvancedSettings{
+			UserHintIsMandatory: proto.Bool(true),
+		}
+	}
 	return &mieruserver.ServerConfig{
 		Config: &mierupb.ServerConfig{
-			PortBindings:   portBindings,
-			Users:          users,
-			TrafficPattern: trafficPattern,
+			PortBindings:     portBindings,
+			Users:            users,
+			TrafficPattern:   trafficPattern,
+			AdvancedSettings: advancedSettings,
 		},
 	}, userNames, nil
 }
