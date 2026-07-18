@@ -6,11 +6,13 @@ package main
 import "C"
 
 import (
+	"encoding/json"
 	"unsafe"
 
 	"github.com/phantomcloude/phantom-core/bridge"
 	pb "github.com/phantomcloude/phantom-core/phantomrpc"
 	v2 "github.com/phantomcloude/phantom-core/v2"
+	"github.com/sagernet/sing-box/experimental/libbox"
 	"github.com/sagernet/sing-box/log"
 )
 
@@ -87,6 +89,41 @@ func urlTest(groupTag *C.char) (CErr *C.char) {
 	})
 
 	return emptyOrErrorC(err)
+}
+
+// fetchSubscriptionWithECH fetches a URL using HTTP/3 and ECH for anti-censorship.
+// It returns a JSON string with fields: status_code, headers, body.
+// On error it returns "error:<message>".
+//
+// IMPORTANT: The Dart caller must free the returned C string via malloc.free()
+// after calling toDartString() to avoid memory leaks.
+//
+//export fetchSubscriptionWithECH
+func fetchSubscriptionWithECH(urlStr *C.char, headersJson *C.char, _ C.int) *C.char {
+	client := libbox.NewCustomHTTPClient()
+	request := client.NewRequest()
+	if err := request.SetURL(C.GoString(urlStr)); err != nil {
+		return C.CString("error:" + err.Error())
+	}
+	request.SetMethod("GET")
+
+	// Parse and set headers
+	var headers map[string]string
+	if err := json.Unmarshal([]byte(C.GoString(headersJson)), &headers); err == nil {
+		for k, v := range headers {
+			request.SetHeader(k, v)
+		}
+	}
+
+	resp, err := request.Execute()
+	if err != nil {
+		return C.CString("error:" + err.Error())
+	}
+	contentBox, err := resp.GetContent()
+	if err != nil {
+		return C.CString("error:" + err.Error())
+	}
+	return C.CString(contentBox.Value)
 }
 
 func emptyOrErrorC(err error) *C.char {
