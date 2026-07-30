@@ -2,6 +2,7 @@ package group
 
 import (
 	"context"
+	"math/rand"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -14,7 +15,7 @@ import (
 	C "github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing-box/option"
-	"github.com/sagernet/sing-tun"
+	tun "github.com/sagernet/sing-tun"
 	"github.com/sagernet/sing/common"
 	"github.com/sagernet/sing/common/batch"
 	E "github.com/sagernet/sing/common/exceptions"
@@ -284,25 +285,61 @@ func (g *URLTestGroup) Close() error {
 	return nil
 }
 
+// Select 从当前组中为指定网络协议选出一个出站节点。
+//
+// 原始实现（保留备查）：
+// 原逻辑确定性地选出绝对最低延迟节点，所有客户端流量集中到同一后端。
+//
+//	func (g *URLTestGroup) Select(network string) (adapter.Outbound, bool) {
+//		var minDelay uint16
+//		var minOutbound adapter.Outbound
+//		switch network {
+//		case N.NetworkTCP:
+//			if g.selectedOutboundTCP != nil {
+//				if history := g.history.LoadURLTestHistory(RealTag(g.selectedOutboundTCP)); history != nil {
+//					minOutbound = g.selectedOutboundTCP
+//					minDelay = history.Delay
+//				}
+//			}
+//		case N.NetworkUDP:
+//			if g.selectedOutboundUDP != nil {
+//				if history := g.history.LoadURLTestHistory(RealTag(g.selectedOutboundUDP)); history != nil {
+//					minOutbound = g.selectedOutboundUDP
+//					minDelay = history.Delay
+//				}
+//			}
+//		}
+//		for _, detour := range g.outbounds {
+//			if !common.Contains(detour.Network(), network) {
+//				continue
+//			}
+//			history := g.history.LoadURLTestHistory(RealTag(detour))
+//			if history == nil {
+//				continue
+//			}
+//			if minDelay == 0 || minDelay > history.Delay+g.tolerance {
+//				minDelay = history.Delay
+//				minOutbound = detour
+//			}
+//		}
+//		if minOutbound == nil {
+//			for _, detour := range g.outbounds {
+//				if !common.Contains(detour.Network(), network) {
+//					continue
+//				}
+//				return detour, false
+//			}
+//			return nil, false
+//		}
+//		return minOutbound, true
+//	}
+//
+// 新实现：容差池随机选择，实现跨客户端负载均衡。
+// 当前节点仍在容差池内时保持不变（连接稳定性），
+// 仅在首次选择或当前节点劣化时从容差池中随机选一个新节点。
 func (g *URLTestGroup) Select(network string) (adapter.Outbound, bool) {
+	// 1. 遍历找出全局最低延迟
 	var minDelay uint16
-	var minOutbound adapter.Outbound
-	switch network {
-	case N.NetworkTCP:
-		if g.selectedOutboundTCP != nil {
-			if history := g.history.LoadURLTestHistory(RealTag(g.selectedOutboundTCP)); history != nil {
-				minOutbound = g.selectedOutboundTCP
-				minDelay = history.Delay
-			}
-		}
-	case N.NetworkUDP:
-		if g.selectedOutboundUDP != nil {
-			if history := g.history.LoadURLTestHistory(RealTag(g.selectedOutboundUDP)); history != nil {
-				minOutbound = g.selectedOutboundUDP
-				minDelay = history.Delay
-			}
-		}
-	}
 	for _, detour := range g.outbounds {
 		if !common.Contains(detour.Network(), network) {
 			continue
@@ -311,21 +348,47 @@ func (g *URLTestGroup) Select(network string) (adapter.Outbound, bool) {
 		if history == nil {
 			continue
 		}
-		if minDelay == 0 || minDelay > history.Delay+g.tolerance {
+		if minDelay == 0 || history.Delay < minDelay {
 			minDelay = history.Delay
-			minOutbound = detour
 		}
 	}
-	if minOutbound == nil {
-		for _, detour := range g.outbounds {
-			if !common.Contains(detour.Network(), network) {
-				continue
-			}
+
+	// 2. 若当前选中节点仍在容差池内，保持不变（稳定性优先，避免不必要的连接中断）
+	var current adapter.Outbound
+	switch network {
+	case N.NetworkTCP:
+		current = g.selectedOutboundTCP
+	case N.NetworkUDP:
+		current = g.selectedOutboundUDP
+	}
+	if current != nil {
+		if history := g.history.LoadURLTestHistory(RealTag(current)); history != nil && history.Delay <= minDelay+g.tolerance {
+			return current, true
+		}
+	}
+
+	// 3. 当前节点不可用或已劣化，构建容差池并随机选一个新节点
+	var pool []adapter.Outbound
+	for _, detour := range g.outbounds {
+		if !common.Contains(detour.Network(), network) {
+			continue
+		}
+		history := g.history.LoadURLTestHistory(RealTag(detour))
+		if history != nil && history.Delay <= minDelay+g.tolerance {
+			pool = append(pool, detour)
+		}
+	}
+	if len(pool) > 0 {
+		return pool[rand.Intn(len(pool))], true
+	}
+
+	// 4. 全部超时，保底返回第一个可用节点
+	for _, detour := range g.outbounds {
+		if common.Contains(detour.Network(), network) {
 			return detour, false
 		}
-		return nil, false
 	}
-	return minOutbound, true
+	return nil, false
 }
 
 func (g *URLTestGroup) loopCheck(ticker *time.Ticker, closeChan <-chan struct{}) {
