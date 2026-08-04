@@ -3,7 +3,7 @@ package include
 import (
 	"context"
 
-	"github.com/sagernet/sing-box"
+	box "github.com/sagernet/sing-box"
 	"github.com/sagernet/sing-box/adapter"
 	"github.com/sagernet/sing-box/adapter/endpoint"
 	"github.com/sagernet/sing-box/adapter/inbound"
@@ -17,24 +17,26 @@ import (
 	"github.com/sagernet/sing-box/dns/transport/local"
 	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing-box/option"
-	"github.com/sagernet/sing-box/protocol/anytls"
+
+	// "github.com/sagernet/sing-box/protocol/anytls"
 	"github.com/sagernet/sing-box/protocol/block"
 	"github.com/sagernet/sing-box/protocol/direct"
 	"github.com/sagernet/sing-box/protocol/group"
 	"github.com/sagernet/sing-box/protocol/http"
-	"github.com/sagernet/sing-box/protocol/mieru"
 	"github.com/sagernet/sing-box/protocol/mixed"
-	"github.com/sagernet/sing-box/protocol/naive"
+
+	// "github.com/sagernet/sing-box/protocol/naive"
 	"github.com/sagernet/sing-box/protocol/redirect"
-	"github.com/sagernet/sing-box/protocol/shadowsocks"
-	"github.com/sagernet/sing-box/protocol/shadowtls"
+	// "github.com/sagernet/sing-box/protocol/shadowsocks"
+	// "github.com/sagernet/sing-box/protocol/shadowtls"
 	"github.com/sagernet/sing-box/protocol/socks"
-	"github.com/sagernet/sing-box/protocol/ssh"
-	"github.com/sagernet/sing-box/protocol/tor"
-	"github.com/sagernet/sing-box/protocol/trojan"
+	// "github.com/sagernet/sing-box/protocol/ssh"
+	// "github.com/sagernet/sing-box/protocol/tor"
+	// "github.com/sagernet/sing-box/protocol/trojan"
 	"github.com/sagernet/sing-box/protocol/tun"
 	"github.com/sagernet/sing-box/protocol/vless"
-	"github.com/sagernet/sing-box/protocol/vmess"
+
+	// "github.com/sagernet/sing-box/protocol/vmess"
 	"github.com/sagernet/sing-box/service/resolved"
 	"github.com/sagernet/sing-box/service/ssmapi"
 	E "github.com/sagernet/sing/common/exceptions"
@@ -56,16 +58,15 @@ func InboundRegistry() *inbound.Registry {
 	http.RegisterInbound(registry)
 	mixed.RegisterInbound(registry)
 
-	shadowsocks.RegisterInbound(registry)
-	vmess.RegisterInbound(registry)
-	trojan.RegisterInbound(registry)
-	naive.RegisterInbound(registry)
-	shadowtls.RegisterInbound(registry)
-	vless.RegisterInbound(registry)
-	anytls.RegisterInbound(registry)
-	mieru.RegisterInbound(registry)
+	// shadowsocks.RegisterInbound(registry)
+	// vmess.RegisterInbound(registry)
+	// trojan.RegisterInbound(registry)
+	// naive.RegisterInbound(registry)
+	// shadowtls.RegisterInbound(registry)
+	// vless.RegisterInbound(registry)
+	// anytls.RegisterInbound(registry)
 
-	registerQUICInbounds(registry)
+	// registerQUICInbounds(registry)
 	registerStubForRemovedInbounds(registry)
 
 	return registry
@@ -81,18 +82,17 @@ func OutboundRegistry() *outbound.Registry {
 	group.RegisterSelector(registry)
 	group.RegisterURLTest(registry)
 
-	socks.RegisterOutbound(registry)
-	http.RegisterOutbound(registry)
-	shadowsocks.RegisterOutbound(registry)
-	vmess.RegisterOutbound(registry)
-	trojan.RegisterOutbound(registry)
-	registerNaiveOutbound(registry)
-	tor.RegisterOutbound(registry)
-	ssh.RegisterOutbound(registry)
-	shadowtls.RegisterOutbound(registry)
+	// socks.RegisterOutbound(registry)
+	// http.RegisterOutbound(registry)
+	// shadowsocks.RegisterOutbound(registry)
+	// vmess.RegisterOutbound(registry)
+	// trojan.RegisterOutbound(registry)
+	// registerNaiveOutbound(registry)
+	// tor.RegisterOutbound(registry)
+	// ssh.RegisterOutbound(registry)
+	// shadowtls.RegisterOutbound(registry)
 	vless.RegisterOutbound(registry)
-	anytls.RegisterOutbound(registry)
-	mieru.RegisterOutbound(registry)
+	// anytls.RegisterOutbound(registry)
 
 	registerQUICOutbounds(registry)
 	registerStubForRemovedOutbounds(registry)

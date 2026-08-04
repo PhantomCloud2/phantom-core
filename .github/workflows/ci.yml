@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - dev
+      - ios
     paths-ignore:
       - "**.md"
       - "docs/**"
