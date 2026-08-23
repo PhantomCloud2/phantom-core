@@ -41,7 +41,7 @@
 	<key>XCFrameworkFormatVersion</key>
 	<string>1.0</string>
 	<key>CFBundleIdentifier</key>
-	<string>ios.libcore.phantom</string>
+	<string>ios.libcore.internal</string>
 	<key>CFBundleShortVersionString</key><string>2.3.0</string>
 	<key>CFBundleVersion</key><string>2.3.0</string>
 	<key>MinimumOSVersion</key>

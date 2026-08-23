@@ -7,5 +7,5 @@ import (
 )
 
 func init() {
-	tun.TunnelType = "phantom"
+	tun.TunnelType = "internal"
 }

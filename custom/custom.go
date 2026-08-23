@@ -9,9 +9,9 @@ import (
 	"encoding/json"
 	"unsafe"
 
-	"github.com/phantomcloude/phantom-core/bridge"
-	pb "github.com/phantomcloude/phantom-core/phantomrpc"
-	v2 "github.com/phantomcloude/phantom-core/v2"
+	"internal-libcore/bridge"
+	pb "internal-libcore/corerpc"
+	v2 "internal-libcore/v2"
 	"github.com/sagernet/sing-box/experimental/libbox"
 	"github.com/sagernet/sing-box/log"
 )

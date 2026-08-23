@@ -1,6 +1,6 @@
 package v2
 
-import pb "github.com/phantomcloude/phantom-core/phantomrpc"
+import pb "internal-libcore/corerpc"
 
 const (
 	Stopped  = "Stopped"

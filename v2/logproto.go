@@ -3,7 +3,7 @@ package v2
 import (
 	"fmt"
 
-	pb "github.com/phantomcloude/phantom-core/phantomrpc"
+	pb "internal-libcore/corerpc"
 	"github.com/sagernet/sing/common/observable"
 )
 

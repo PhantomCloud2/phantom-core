@@ -3,7 +3,7 @@ package v2
 import (
 	"errors"
 
-	pb "github.com/phantomcloude/phantom-core/phantomrpc"
+	pb "internal-libcore/corerpc"
 	"github.com/sagernet/sing-box/experimental/libbox"
 	"github.com/sagernet/sing-box/log"
 )

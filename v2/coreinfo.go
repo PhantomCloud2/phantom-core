@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/phantomcloude/phantom-core/bridge"
-	pb "github.com/phantomcloude/phantom-core/phantomrpc"
+	"internal-libcore/bridge"
+	pb "internal-libcore/corerpc"
 )
 
 var (

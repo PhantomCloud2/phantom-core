@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.3
-// source: phantomrpc/phantom.proto
+// source: corerpc/core.proto
 
-package phantomrpc
+package corerpc
 
 import (
 	context "context"
@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Hello_SayHello_FullMethodName       = "/phantomrpc.Hello/SayHello"
-	Hello_SayHelloStream_FullMethodName = "/phantomrpc.Hello/SayHelloStream"
+	Hello_SayHello_FullMethodName       = "/corerpc.Hello/SayHello"
+	Hello_SayHelloStream_FullMethodName = "/corerpc.Hello/SayHelloStream"
 )
 
 // HelloClient is the client API for Hello service.
@@ -134,7 +134,7 @@ type Hello_SayHelloStreamServer = grpc.BidiStreamingServer[HelloRequest, HelloRe
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Hello_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "phantomrpc.Hello",
+	ServiceName: "corerpc.Hello",
 	HandlerType: (*HelloServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -150,24 +150,24 @@ var Hello_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "phantomrpc/phantom.proto",
+	Metadata: "corerpc/core.proto",
 }
 
 const (
-	Core_Start_FullMethodName                 = "/phantomrpc.Core/Start"
-	Core_CoreInfoListener_FullMethodName      = "/phantomrpc.Core/CoreInfoListener"
-	Core_OutboundsInfo_FullMethodName         = "/phantomrpc.Core/OutboundsInfo"
-	Core_MainOutboundsInfo_FullMethodName     = "/phantomrpc.Core/MainOutboundsInfo"
-	Core_GetSystemInfo_FullMethodName         = "/phantomrpc.Core/GetSystemInfo"
-	Core_Setup_FullMethodName                 = "/phantomrpc.Core/Setup"
-	Core_StartService_FullMethodName          = "/phantomrpc.Core/StartService"
-	Core_Stop_FullMethodName                  = "/phantomrpc.Core/Stop"
-	Core_Restart_FullMethodName               = "/phantomrpc.Core/Restart"
-	Core_SelectOutbound_FullMethodName        = "/phantomrpc.Core/SelectOutbound"
-	Core_UrlTest_FullMethodName               = "/phantomrpc.Core/UrlTest"
-	Core_GetSystemProxyStatus_FullMethodName  = "/phantomrpc.Core/GetSystemProxyStatus"
-	Core_SetSystemProxyEnabled_FullMethodName = "/phantomrpc.Core/SetSystemProxyEnabled"
-	Core_LogListener_FullMethodName           = "/phantomrpc.Core/LogListener"
+	Core_Start_FullMethodName                 = "/corerpc.Core/Start"
+	Core_CoreInfoListener_FullMethodName      = "/corerpc.Core/CoreInfoListener"
+	Core_OutboundsInfo_FullMethodName         = "/corerpc.Core/OutboundsInfo"
+	Core_MainOutboundsInfo_FullMethodName     = "/corerpc.Core/MainOutboundsInfo"
+	Core_GetSystemInfo_FullMethodName         = "/corerpc.Core/GetSystemInfo"
+	Core_Setup_FullMethodName                 = "/corerpc.Core/Setup"
+	Core_StartService_FullMethodName          = "/corerpc.Core/StartService"
+	Core_Stop_FullMethodName                  = "/corerpc.Core/Stop"
+	Core_Restart_FullMethodName               = "/corerpc.Core/Restart"
+	Core_SelectOutbound_FullMethodName        = "/corerpc.Core/SelectOutbound"
+	Core_UrlTest_FullMethodName               = "/corerpc.Core/UrlTest"
+	Core_GetSystemProxyStatus_FullMethodName  = "/corerpc.Core/GetSystemProxyStatus"
+	Core_SetSystemProxyEnabled_FullMethodName = "/corerpc.Core/SetSystemProxyEnabled"
+	Core_LogListener_FullMethodName           = "/corerpc.Core/LogListener"
 )
 
 // CoreClient is the client API for Core service.
@@ -645,7 +645,7 @@ type Core_LogListenerServer = grpc.BidiStreamingServer[StopRequest, LogMessage]
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Core_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "phantomrpc.Core",
+	ServiceName: "corerpc.Core",
 	HandlerType: (*CoreServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -717,14 +717,14 @@ var Core_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "phantomrpc/phantom.proto",
+	Metadata: "corerpc/core.proto",
 }
 
 const (
-	TunnelService_Start_FullMethodName  = "/phantomrpc.TunnelService/Start"
-	TunnelService_Stop_FullMethodName   = "/phantomrpc.TunnelService/Stop"
-	TunnelService_Status_FullMethodName = "/phantomrpc.TunnelService/Status"
-	TunnelService_Exit_FullMethodName   = "/phantomrpc.TunnelService/Exit"
+	TunnelService_Start_FullMethodName  = "/corerpc.TunnelService/Start"
+	TunnelService_Stop_FullMethodName   = "/corerpc.TunnelService/Stop"
+	TunnelService_Status_FullMethodName = "/corerpc.TunnelService/Status"
+	TunnelService_Exit_FullMethodName   = "/corerpc.TunnelService/Exit"
 )
 
 // TunnelServiceClient is the client API for TunnelService service.
@@ -912,7 +912,7 @@ func _TunnelService_Exit_Handler(srv interface{}, ctx context.Context, dec func(
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TunnelService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "phantomrpc.TunnelService",
+	ServiceName: "corerpc.TunnelService",
 	HandlerType: (*TunnelServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -933,5 +933,5 @@ var TunnelService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "phantomrpc/phantom.proto",
+	Metadata: "corerpc/core.proto",
 }

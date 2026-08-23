@@ -7,8 +7,8 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/phantomcloude/phantom-core/bridge"
-	pb "github.com/phantomcloude/phantom-core/phantomrpc"
+	"internal-libcore/bridge"
+	pb "internal-libcore/corerpc"
 	"github.com/sagernet/sing-box/experimental/libbox"
 	"github.com/sagernet/sing-box/log"
 )

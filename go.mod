@@ -1,4 +1,4 @@
-module github.com/phantomcloude/phantom-core
+module internal-libcore
 
 go 1.25.0
 

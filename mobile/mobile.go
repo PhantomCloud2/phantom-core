@@ -1,7 +1,7 @@
 package mobile
 
 import (
-	v2 "github.com/phantomcloude/phantom-core/v2"
+	v2 "internal-libcore/v2"
 	_ "github.com/sagernet/gomobile"
 )
 
