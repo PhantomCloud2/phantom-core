@@ -21,27 +21,27 @@ jobs:
       matrix:
         job:
           - {
-              name: "phantom-core-android",
+              name: "tunnel-core-android",
               os: "ubuntu-latest",
               target: "android",
             }
           - {
-              name: "phantom-core-linux-amd64",
+              name: "tunnel-core-linux-amd64",
               os: "ubuntu-latest",
               target: "linux-amd64",
             }
           - {
-              name: "phantom-core-windows-amd64",
+              name: "tunnel-core-windows-amd64",
               os: "ubuntu-latest",
               target: "windows-amd64",
               aarch: "x64",
             }
           - {
-              name: "phantom-core-macos-universal",
+              name: "tunnel-core-macos-universal",
               os: "macos-15",
               target: "macos-universal",
             }
-          - { name: "phantom-core-ios", os: "macos-15", target: "ios" }
+          - { name: "tunnel-core-ios", os: "macos-15", target: "ios" }
 
     runs-on: ${{ matrix.job.os }}
     steps:
@@ -131,7 +131,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-          pattern: phantom-*
+          pattern: tunnel-*
           path: bin/
 
       - name: Display Files Structure
@@ -165,7 +165,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-          pattern: phantom-*
+          pattern: tunnel-*
           path: bin/
 
       - name: Display Files Structure
@@ -195,4 +195,4 @@ jobs:
         uses: geekyeggo/delete-artifact@v5
         with:
           name: |
-            phantom-*
+            tunnel-*

@@ -22,8 +22,8 @@ GOMODCACHE=$(shell go env GOMODCACHE)
 SING_PACKAGES=$(shell ls $(GOMODCACHE)/github.com/sagernet 2>/dev/null | grep '^sing-' | sort -u)
 TRIMPATH_REPLACEMENTS=$(shell echo '$(SING_PACKAGES)' | tr ' ' '\n' | sed 's|^sing-\(.*\)$$|$(GOMODCACHE)/github.com/sagernet/sing-\1=>internal-\1|' | tr '\n' ';' | sed 's|;$$||')
 
-COMMON_FLAGS=-trimpath -ldflags="-w -s -buildid= -checklinkname=0" -buildvcs=false -gcflags=all=-trimpath="$(GOMODCACHE)/github.com/sagernet=>internal-core;$(shell pwd)=>internal-core;internal-libcore=>internal-core;github.com/phantomcloude/phantom-core=>internal-core;github.com/phantomcloude/core=>internal-core;$(TRIMPATH_REPLACEMENTS)"
-GOBUILD_FLAGS=$(COMMON_FLAGS) -asmflags=all=-trimpath="$(GOMODCACHE)/github.com/sagernet=>internal-core;$(shell pwd)=>internal-core;internal-libcore=>internal-core;github.com/phantomcloude/phantom-core=>internal-core;github.com/phantomcloude/core=>internal-core;$(TRIMPATH_REPLACEMENTS)"
+COMMON_FLAGS=-trimpath -ldflags="-w -s -buildid= -checklinkname=0" -buildvcs=false -gcflags=all=-trimpath="$(GOMODCACHE)/github.com/sagernet=>internal-core;$(shell pwd)=>internal-core;internal-libcore=>internal-core;$(TRIMPATH_REPLACEMENTS)"
+GOBUILD_FLAGS=$(COMMON_FLAGS) -asmflags=all=-trimpath="$(GOMODCACHE)/github.com/sagernet=>internal-core;$(shell pwd)=>internal-core;internal-libcore=>internal-core;$(TRIMPATH_REPLACEMENTS)"
 GOBUILDLIB=CGO_ENABLED=1 CGO_CFLAGS="-O2 -g0 -pipe" CGO_CXXFLAGS="-O2 -g0 -pipe" CGO_LDFLAGS="-s" go build -buildmode=c-shared -tags $(TAGS) $(GOBUILD_FLAGS)
 
 mod_download:
