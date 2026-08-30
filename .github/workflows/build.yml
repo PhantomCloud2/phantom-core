@@ -54,7 +54,16 @@ jobs:
           go-version-file: "go.mod"
           check-latest: false
 
+      - name: Relocate to clean build directory
+        run: |
+          BUILD_DIR="${RUNNER_TEMP}/libcore_src"
+          rm -rf "$BUILD_DIR"
+          mkdir -p "$BUILD_DIR"
+          cp -a . "$BUILD_DIR/"
+          echo "BUILD_DIR=$BUILD_DIR" >> $GITHUB_ENV
+
       - name: Patch module
+        working-directory: ${{ env.BUILD_DIR }}
         run: |
           bash patch-module.sh
 
@@ -87,6 +96,7 @@ jobs:
           brew install create-dmg tree coreutils
 
       - name: Build
+        working-directory: ${{ env.BUILD_DIR }}
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
@@ -94,6 +104,8 @@ jobs:
             export CGO_CFLAGS="-I${ANDROID_NDK_HOME}/sources/android/cpufeatures"
           fi
           make -j$(($(nproc) + 1)) ${{ matrix.job.target }}
+          mkdir -p "$GITHUB_WORKSPACE/bin"
+          rsync -a bin/ "$GITHUB_WORKSPACE/bin/"
 
       - name: zip
         working-directory: bin
