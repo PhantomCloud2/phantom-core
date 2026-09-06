@@ -16,8 +16,6 @@ DARWIN_ADD_TAGS=with_dhcp
 WINDOWS_ADD_TAGS=with_purego
 LINUX_ADD_TAGS=with_purego
 
-CRONET_GO_VERSION=$(shell go list -m -f '{{.Version}}' github.com/sagernet/cronet-go 2>/dev/null)
-
 GOMODCACHE=$(shell go env GOMODCACHE)
 SING_PACKAGES=$(shell ls $(GOMODCACHE)/github.com/sagernet 2>/dev/null | grep '^sing-' | sort -u)
 TRIMPATH_REPLACEMENTS=$(shell echo '$(SING_PACKAGES)' | tr ' ' '\n' | sed 's|^sing-\(.*\)$$|$(GOMODCACHE)/github.com/sagernet/sing-\1=>internal-\1|' | tr '\n' ';' | sed 's|;$$||')
@@ -48,16 +46,27 @@ ios: lib_install
 	gomobile bind -v -target ios -libname=box -tags=$(TAGS),$(IOS_ADD_TAGS) -trimpath -buildvcs=false $(COMMON_FLAGS) -o $(BINDIR)/Libcore.xcframework github.com/sagernet/sing-box/experimental/libbox
 	cp Info.plist $(BINDIR)/Libcore.xcframework/
 
+SHELL := /bin/bash
+.SHELLFLAGS := -eu -o pipefail -c
+
 .PHONY: build
 windows-amd64: TAGS := $(TAGS),$(WINDOWS_ADD_TAGS)
 windows-amd64: mod_download
-	go run -v "github.com/sagernet/cronet-go/cmd/build-naive@$(CRONET_GO_VERSION)" extract-lib --target windows/amd64 -o $(BINDIR)/
+	if [[ ",$(TAGS)," == *",with_naive_outbound,"* ]]; then \
+		cp "$$(go list -m -f '{{.Dir}}' github.com/sagernet/cronet-go/lib/windows_amd64)/libcronet.dll" $(BINDIR)/; \
+	else \
+		rm -f $(BINDIR)/libcronet.dll; \
+	fi
 	env GOOS=windows GOARCH=amd64 CC=x86_64-w64-mingw32-gcc $(GOBUILDLIB) -o $(BINDIR)/$(LIBNAME).dll ./custom
 
 linux-amd64: TAGS := $(TAGS),$(LINUX_ADD_TAGS)
 linux-amd64: mod_download
 	mkdir -p $(BINDIR)/lib
-	go run -v "github.com/sagernet/cronet-go/cmd/build-naive@$(CRONET_GO_VERSION)" extract-lib --target linux/amd64 -o $(BINDIR)/lib/
+	if [[ ",$(TAGS)," == *",with_naive_outbound,"* ]]; then \
+		cp "$$(go list -m -f '{{.Dir}}' github.com/sagernet/cronet-go/lib/linux_amd64)/libcronet.so" $(BINDIR)/lib/; \
+	else \
+		rm -f $(BINDIR)/lib/libcronet.so; \
+	fi
 	env GOOS=linux GOARCH=amd64 $(GOBUILDLIB) -o $(BINDIR)/lib/$(LIBNAME).so ./custom
 
 macos-amd64: mod_download
@@ -70,7 +79,7 @@ macos-universal: macos-amd64 macos-arm64
 	lipo -create $(BINDIR)/$(LIBNAME)-amd64.dylib $(BINDIR)/$(LIBNAME)-arm64.dylib -output $(BINDIR)/$(LIBNAME).dylib
 
 clean:
-	rm $(BINDIR)/*
+	rm -rf $(BINDIR)/*
 
 build_protobuf:
 	protoc --go_out=. --go-grpc_out=. corerpc/core.proto
