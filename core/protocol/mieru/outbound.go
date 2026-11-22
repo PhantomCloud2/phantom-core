@@ -27,6 +27,7 @@ import (
 
 type Outbound struct {
 	outbound.Adapter
+	ctx    context.Context
 	dialer N.Dialer
 	logger log.ContextLogger
 	client mieruclient.Client
@@ -50,17 +51,30 @@ func NewOutbound(ctx context.Context, router adapter.Router, logger log.ContextL
 	if err := c.Store(config); err != nil {
 		return nil, fmt.Errorf("failed to store mieru client config: %w", err)
 	}
-	if err := c.Start(); err != nil {
-		return nil, fmt.Errorf("failed to start mieru client: %w", err)
-	}
-	logger.InfoContext(ctx, "mieru client is started")
 
 	return &Outbound{
 		Adapter: outbound.NewAdapterWithDialerOptions(C.TypeMieru, tag, []string{N.NetworkTCP, N.NetworkUDP}, options.DialerOptions),
+		ctx:     ctx,
 		dialer:  outboundDialer,
 		logger:  logger,
 		client:  c,
 	}, nil
+}
+
+func (o *Outbound) Start(stage adapter.StartStage, scope *adapter.Scope) error {
+	if stage != adapter.StartStateStart {
+		return nil
+	}
+	if err := o.client.Start(); err != nil {
+		return fmt.Errorf("failed to start mieru client: %w", err)
+	}
+	scope.Add(o.close)
+	o.logger.InfoContext(o.ctx, "mieru client is started")
+	return nil
+}
+
+func (o *Outbound) close() error {
+	return common.Close(o.client)
 }
 
 func (o *Outbound) DialContext(ctx context.Context, network string, destination M.Socksaddr) (net.Conn, error) {
@@ -108,10 +122,6 @@ func (o *Outbound) ListenPacket(ctx context.Context, destination M.Socksaddr) (n
 		return nil, err
 	}
 	return mierucommon.NewUDPAssociateWrapper(mierucommon.NewPacketOverStreamTunnel(streamConn)), nil
-}
-
-func (o *Outbound) Close() error {
-	return common.Close(o.client)
 }
 
 // mieruDialer is an adapter to mieru dialer interface.

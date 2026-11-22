@@ -19,6 +19,28 @@ var (
 	oldGroupInfoOnlyClient *libbox.CommandClient
 )
 
+func replaceCommandClient(slot **libbox.CommandClient, next *libbox.CommandClient) error {
+	if *slot != nil {
+		_ = (*slot).Disconnect()
+		*slot = nil
+	}
+	if err := next.Connect(); err != nil {
+		_ = next.Disconnect()
+		return err
+	}
+	*slot = next
+	return nil
+}
+
+func disconnectCommandClient(slot **libbox.CommandClient) error {
+	if *slot == nil {
+		return nil
+	}
+	err := (*slot).Disconnect()
+	*slot = nil
+	return err
+}
+
 func StartCommand(command int32, port int64) error {
 	switch command {
 	case flutterCommandStatus:
@@ -26,29 +48,25 @@ func StartCommand(command int32, port int64) error {
 			StatusInterval: 1000000000, // 1000ms debounce
 		}
 		statusCmdOpts.AddCommand(libbox.CommandStatus)
-		oldStatusClient = libbox.NewCommandClient(
+		return replaceCommandClient(&oldStatusClient, libbox.NewCommandClient(
 			&OldCommandClientHandler{
 				port:   port,
 				logger: coreLogFactory.NewLogger("[Status Command Client]"),
 			},
 			statusCmdOpts,
-		)
-
-		return oldStatusClient.Connect()
+		))
 	case flutterCommandGroup:
 		groupCmdOpts := &libbox.CommandClientOptions{
 			StatusInterval: 300000000, // 300ms debounce
 		}
 		groupCmdOpts.AddCommand(libbox.CommandGroup)
-		oldGroupClient = libbox.NewCommandClient(
+		return replaceCommandClient(&oldGroupClient, libbox.NewCommandClient(
 			&OldCommandClientHandler{
 				port:   port,
 				logger: coreLogFactory.NewLogger("[Group Command Client]"),
 			},
 			groupCmdOpts,
-		)
-
-		return oldGroupClient.Connect()
+		))
 	case flutterCommandGroupInfoOnly:
 		// CommandGroupInfoOnly has been removed from libbox; map to CommandGroup
 		// (new API only has a streaming subscription, not a one-shot fetch).
@@ -56,15 +74,13 @@ func StartCommand(command int32, port int64) error {
 			StatusInterval: 300000000, // 300ms debounce
 		}
 		groupInfoOnlyOpts.AddCommand(libbox.CommandGroup)
-		oldGroupInfoOnlyClient = libbox.NewCommandClient(
+		return replaceCommandClient(&oldGroupInfoOnlyClient, libbox.NewCommandClient(
 			&OldCommandClientHandler{
 				port:   port,
 				logger: coreLogFactory.NewLogger("[GroupInfoOnly Command Client]"),
 			},
 			groupInfoOnlyOpts,
-		)
-
-		return oldGroupInfoOnlyClient.Connect()
+		))
 	}
 
 	return nil
@@ -73,17 +89,11 @@ func StartCommand(command int32, port int64) error {
 func StopCommand(command int32) error {
 	switch command {
 	case flutterCommandStatus:
-		err := oldStatusClient.Disconnect()
-		oldStatusClient = nil
-		return err
+		return disconnectCommandClient(&oldStatusClient)
 	case flutterCommandGroup:
-		err := oldGroupClient.Disconnect()
-		oldGroupClient = nil
-		return err
+		return disconnectCommandClient(&oldGroupClient)
 	case flutterCommandGroupInfoOnly:
-		err := oldGroupInfoOnlyClient.Disconnect()
-		oldGroupInfoOnlyClient = nil
-		return err
+		return disconnectCommandClient(&oldGroupInfoOnlyClient)
 	}
 
 	return nil

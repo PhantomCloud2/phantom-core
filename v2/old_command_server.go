@@ -53,6 +53,14 @@ func (csh *CommandServerHandler) WriteDebugMessage(message string) {
 	csh.logger.Trace(message)
 }
 
+func (csh *CommandServerHandler) TriggerNativeCrash() error {
+	return nil
+}
+
+func (csh *CommandServerHandler) ConnectSSHAgent() (int32, error) {
+	return 0, errors.New("unsupported")
+}
+
 func startCommandServer() error {
 	if oldCommandServer != nil {
 		return nil // already running

@@ -116,6 +116,9 @@ func (cch *OldCommandClientHandler) SetDefaultLogLevel(level int32) {
 func (cch *OldCommandClientHandler) WriteConnectionEvents(events *libbox.ConnectionEvents) {
 }
 
+func (cch *OldCommandClientHandler) WriteOutbounds(message libbox.OutboundGroupItemIterator) {
+}
+
 type OutboundGroup struct {
 	Tag      string               `json:"tag"`
 	Type     string               `json:"type"`

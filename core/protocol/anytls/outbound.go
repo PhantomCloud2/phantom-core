@@ -30,11 +30,12 @@ var _ adapter.OutboundWithMultiplex = (*Outbound)(nil)
 
 type Outbound struct {
 	outbound.Adapter
+	ctx            context.Context
 	dialer         tls.Dialer
 	server         M.Socksaddr
 	tlsConfig      tls.Config
+	clientOptions  anytls.ClientConfig
 	clientMetadata string
-	client         *anytls.Client
 	sessionClient  *session.Client
 	uotClient      *uot.Client
 	logger         log.ContextLogger
@@ -43,6 +44,7 @@ type Outbound struct {
 func NewOutbound(ctx context.Context, router adapter.Router, logger log.ContextLogger, tag string, options option.AnyTLSOutboundOptions) (adapter.Outbound, error) {
 	outbound := &Outbound{
 		Adapter: outbound.NewAdapterWithDialerOptions(C.TypeAnyTLS, tag, []string{N.NetworkTCP, N.NetworkUDP}, options.DialerOptions),
+		ctx:     ctx,
 		server:  options.ServerOptions.Build(),
 		logger:  logger,
 	}
@@ -74,26 +76,33 @@ func NewOutbound(ctx context.Context, router adapter.Router, logger log.ContextL
 
 	outbound.dialer = tls.NewDialer(outboundDialer, tlsConfig)
 
-	client, err := anytls.NewClient(ctx, anytls.ClientConfig{
+	outbound.clientOptions = anytls.ClientConfig{
 		Password:                 options.Password,
 		IdleSessionCheckInterval: options.IdleSessionCheckInterval.Build(),
 		IdleSessionTimeout:       options.IdleSessionTimeout.Build(),
 		MinIdleSession:           options.MinIdleSession,
 		DialOut:                  outbound.dialOut,
 		Logger:                   logger,
-	})
-	if err != nil {
-		return nil, err
 	}
-	outbound.client = client
 	outbound.clientMetadata = options.ClientMetadata
-	outbound.sessionClient = sessionClientOf(client)
+	return outbound, nil
+}
 
-	outbound.uotClient = &uot.Client{
-		Dialer:  (anytlsDialer)(outbound.createProxy),
+func (h *Outbound) Start(stage adapter.StartStage, scope *adapter.Scope) error {
+	if stage != adapter.StartStateInitialize {
+		return nil
+	}
+	client, err := anytls.NewClient(h.ctx, h.clientOptions)
+	if err != nil {
+		return err
+	}
+	scope.Add(client.Close)
+	h.sessionClient = sessionClientOf(client)
+	h.uotClient = &uot.Client{
+		Dialer:  anytlsDialer(h.createProxy),
 		Version: uot.Version,
 	}
-	return outbound, nil
+	return nil
 }
 
 func (h *Outbound) createProxy(ctx context.Context, destination M.Socksaddr) (net.Conn, error) {
@@ -121,7 +130,7 @@ func (d anytlsDialer) ListenPacket(ctx context.Context, destination M.Socksaddr)
 }
 
 func (h *Outbound) dialOut(ctx context.Context) (net.Conn, error) {
-	return h.dialer.DialTLSContext(ctx, h.server)
+	return h.dialer.DialTLSContext(adapter.ContextForMultiplexSession(ctx), h.server)
 }
 
 func (h *Outbound) MultiplexEnabled() bool {
@@ -149,8 +158,4 @@ func (h *Outbound) ListenPacket(ctx context.Context, destination M.Socksaddr) (n
 	metadata.Destination = destination
 	h.logger.InfoContext(ctx, "outbound UoT packet connection to ", destination)
 	return h.uotClient.ListenPacket(ctx, destination)
-}
-
-func (h *Outbound) Close() error {
-	return common.Close(h.client)
 }

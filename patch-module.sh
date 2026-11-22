@@ -28,4 +28,4 @@ find . -name "Makefile" -type f -exec $SED_CMD 's|github\.com/sagernet/sing-box/
 find . -name "*.go" -type f -exec $SED_CMD 's|github\.com/sagernet/sing-box"|internal-core"|g' {} +
 find . -name "*.mod" -type f -exec $SED_CMD 's|github\.com/sagernet/sing-box|internal-core|g' {} +
 
-(cd core && make proto_install && make fmt_install && make proto)
+(cd core && make proto_install && go run ./cmd/internal/protogen)

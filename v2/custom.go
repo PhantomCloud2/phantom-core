@@ -70,7 +70,6 @@ func Start(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Starting Core")
 	SetCoreStatus(pb.CoreState_STARTING, pb.MessageType_EMPTY, "")
-	libbox.SetMemoryLimit(!in.GetDisableMemoryLimit())
 	resp, err := StartService(in)
 
 	return resp, err
@@ -81,31 +80,10 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 
 	content := in.GetConfigContent()
 
-	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Parsing Config")
-
-	ctx := createBaseContext()
-	parsedContent, err := readOptions(ctx, content)
-
-	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Parsed")
-
-	if err != nil {
-		Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
-		resp := SetCoreStatus(
-			pb.CoreState_STOPPED,
-			pb.MessageType_ERROR_PARSING_CONFIG,
-			err.Error(),
-		)
-		StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
-
-		return resp, err
-	}
-
-	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Saving config")
-
 	if in.GetEnableOldCommandServer() {
 		Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Starting Command Server")
 
-		err = startCommandServer()
+		err := startCommandServer()
 		if err != nil {
 			Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
 			resp := SetCoreStatus(
@@ -137,6 +115,25 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 		lastConfigContent = content
 		resp := SetCoreStatus(pb.CoreState_STARTED, pb.MessageType_EMPTY, "")
 		return resp, nil
+	}
+
+	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Parsing Config")
+
+	ctx := createBaseContext()
+	parsedContent, err := readOptions(ctx, content)
+
+	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Parsed")
+
+	if err != nil {
+		Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
+		resp := SetCoreStatus(
+			pb.CoreState_STOPPED,
+			pb.MessageType_ERROR_PARSING_CONFIG,
+			err.Error(),
+		)
+		StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
+
+		return resp, err
 	}
 
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Stating Service ")
@@ -256,7 +253,6 @@ func Restart(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 	SetCoreStatus(pb.CoreState_STARTING, pb.MessageType_EMPTY, "")
 	<-time.After(250 * time.Millisecond)
 
-	libbox.SetMemoryLimit(!in.GetDisableMemoryLimit())
 	resp, gErr := StartService(in)
 
 	return resp, gErr

@@ -136,42 +136,49 @@ func (r *customHTTPRequest) Execute() (HTTPResponse, error) {
 		return cfg
 	}
 
-	type requestFunc func() (*http.Response, error)
+	type httpResult struct {
+		resp    *http.Response
+		cleanup func()
+	}
+	type requestFunc func() (*http.Response, func(), error)
 	var funcs []requestFunc
 
 	// Attempt 1: TCP + TLS (with ECH when available)
-	funcs = append(funcs, func() (*http.Response, error) {
+	funcs = append(funcs, func() (*http.Response, func(), error) {
 		var reqBody io.Reader
 		if len(r.body) > 0 {
 			reqBody = bytes.NewReader(r.body)
 		}
 		req, err := http.NewRequestWithContext(ctx, r.method, r.url, reqBody)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		copyHeaders(req)
-		client := &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: buildTLS(),
-				DialContext: (&net.Dialer{
-					Timeout: 5 * time.Second,
-				}).DialContext,
-			},
+		tr := &http.Transport{
+			TLSClientConfig: buildTLS(),
+			DialContext: (&net.Dialer{
+				Timeout: 5 * time.Second,
+			}).DialContext,
 		}
-		return client.Do(req)
+		resp, err := (&http.Client{Transport: tr}).Do(req)
+		if err != nil {
+			tr.CloseIdleConnections()
+			return nil, nil, err
+		}
+		return resp, tr.CloseIdleConnections, nil
 	})
 
 	// Attempt 2: HTTP/3 over QUIC (with ECH when available)
-	// Note: do NOT defer tr.CloseIdleConnections() inside the goroutine —
-	// the goroutine returns a live response; close only on failure.
-	funcs = append(funcs, func() (*http.Response, error) {
+	// Note: close the transport after the caller finishes reading resp.Body
+	// (or immediately on failure / loser cancellation) to release UDP sockets.
+	funcs = append(funcs, func() (*http.Response, func(), error) {
 		var reqBody io.Reader
 		if len(r.body) > 0 {
 			reqBody = bytes.NewReader(r.body)
 		}
 		req, err := http.NewRequestWithContext(ctx, r.method, r.url, reqBody)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		copyHeaders(req)
 		tr := &http3.Transport{
@@ -182,15 +189,14 @@ func (r *customHTTPRequest) Execute() (HTTPResponse, error) {
 		}
 		resp, err := (&http.Client{Transport: tr}).Do(req)
 		if err != nil {
-			tr.CloseIdleConnections()
-			return nil, err
+			_ = tr.Close()
+			return nil, nil, err
 		}
-		return resp, nil
+		return resp, func() { _ = tr.Close() }, nil
 	})
 
 	// Race: pick the first successful response
-	// No wrapper struct needed — channel carries *http.Response directly.
-	successCh := make(chan *http.Response, len(funcs))
+	successCh := make(chan httpResult, len(funcs))
 	var mu sync.Mutex
 	var finalErr error
 	var successCount int32
@@ -198,7 +204,7 @@ func (r *customHTTPRequest) Execute() (HTTPResponse, error) {
 
 	for i, f := range funcs {
 		go func(index int, run requestFunc) {
-			resp, err := run()
+			resp, cleanup, err := run()
 			if err != nil {
 				mu.Lock()
 				finalErr = errors.Join(finalErr, fmt.Errorf("task %d: %w", index, err))
@@ -209,28 +215,35 @@ func (r *customHTTPRequest) Execute() (HTTPResponse, error) {
 				return
 			}
 			if atomic.CompareAndSwapInt32(&successCount, 0, 1) {
-				successCh <- resp
+				successCh <- httpResult{resp: resp, cleanup: cleanup}
 			} else {
 				resp.Body.Close() // loser — discard
+				if cleanup != nil {
+					cleanup()
+				}
 			}
 		}(i, f)
 	}
 
 	select {
-	case resp := <-successCh:
+	case res := <-successCh:
+		defer func() {
+			res.resp.Body.Close()
+			if res.cleanup != nil {
+				res.cleanup()
+			}
+		}()
 		// Validate HTTP status before handing response to caller
-		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-			resp.Body.Close()
-			return nil, fmt.Errorf("http %d: %s", resp.StatusCode, resp.Status)
+		if res.resp.StatusCode < 200 || res.resp.StatusCode >= 300 {
+			return nil, fmt.Errorf("http %d: %s", res.resp.StatusCode, res.resp.Status)
 		}
-		bodyBytes, err := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		bodyBytes, err := io.ReadAll(res.resp.Body)
 		if err != nil {
 			return nil, fmt.Errorf("read body error: %w", err)
 		}
 		jsonBytes, err := json.Marshal(httpResponseJSON{
-			StatusCode: resp.StatusCode,
-			Headers:    resp.Header,
+			StatusCode: res.resp.StatusCode,
+			Headers:    res.resp.Header,
 			Body:       string(bodyBytes),
 		})
 		if err != nil {
@@ -239,6 +252,14 @@ func (r *customHTTPRequest) Execute() (HTTPResponse, error) {
 		return &customHTTPResponse{content: jsonBytes}, nil
 
 	case <-ctx.Done():
+		select {
+		case res := <-successCh:
+			res.resp.Body.Close()
+			if res.cleanup != nil {
+				res.cleanup()
+			}
+		default:
+		}
 		mu.Lock()
 		defer mu.Unlock()
 		if finalErr != nil {
@@ -370,19 +391,8 @@ func queryDoHAlidns(ctx context.Context, msg *mDNS.Msg) (*mDNS.Msg, error) {
 	encoded := base64.RawURLEncoding.EncodeToString(packed)
 	reqURL := fmt.Sprintf("https://223.5.5.5/dns-query?dns=%s", encoded)
 
-	// Use an independent context with its own deadline so that a cancellation
-	// of the outer fetchECHConfig context (triggered by a UDP winner) does not
-	// abort an in-flight DoH response mid-stream.  1500 ms hard cap is enough.
-	dohCtx, dohCancel := context.WithTimeout(context.Background(), 1500*time.Millisecond)
+	dohCtx, dohCancel := context.WithTimeout(ctx, 1500*time.Millisecond)
 	defer dohCancel()
-	// Still respect explicit parent cancellation (e.g. overall app shutdown).
-	go func() {
-		select {
-		case <-ctx.Done():
-			dohCancel()
-		case <-dohCtx.Done():
-		}
-	}()
 
 	req, err := http.NewRequestWithContext(dohCtx, "GET", reqURL, nil)
 	if err != nil {
@@ -390,13 +400,14 @@ func queryDoHAlidns(ctx context.Context, msg *mDNS.Msg) (*mDNS.Msg, error) {
 	}
 	req.Header.Set("Accept", "application/dns-message")
 
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				ServerName: "dns.alidns.com",
-			},
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			ServerName: "dns.alidns.com",
 		},
 	}
+	defer tr.CloseIdleConnections()
+
+	client := &http.Client{Transport: tr}
 
 	resp, err := client.Do(req)
 	if err != nil {

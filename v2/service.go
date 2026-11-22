@@ -32,10 +32,11 @@ func Setup(basePath, workingPath, tempPath string, statusPort int64, debug bool)
 	statusPropagationPort = statusPort
 
 	setupOpts := &libbox.SetupOptions{
-		BasePath:    basePath,
-		WorkingPath: workingPath,
-		TempPath:    tempPath,
-		Debug:       debug,
+		BasePath:          basePath,
+		WorkingPath:       workingPath,
+		TempPath:          tempPath,
+		Debug:             debug,
+		CrashReportSource: "Core",
 	}
 	// Windows does not support Unix domain sockets; use TCP instead.
 	// Pass 0 to let the OS assign a random available port; command_server.go
@@ -100,6 +101,7 @@ func createBaseContext() context.Context {
 		include.EndpointRegistry(),
 		include.DNSTransportRegistry(),
 		include.ServiceRegistry(),
+		include.CertificateProviderRegistry(),
 	)
 }
 

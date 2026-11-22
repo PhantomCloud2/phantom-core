@@ -28,8 +28,8 @@ mod_download:
 	go mod download all
 
 lib_install: mod_download
-	go install -v github.com/sagernet/gomobile/cmd/gomobile@v0.1.11
-	go install -v github.com/sagernet/gomobile/cmd/gobind@v0.1.11
+	go install -v github.com/sagernet/gomobile/cmd/gomobile@v0.1.13
+	go install -v github.com/sagernet/gomobile/cmd/gobind@v0.1.13
 
 headers: mod_download
 	go build -buildmode=c-archive -o $(BINDIR)/$(LIBNAME).h ./custom
