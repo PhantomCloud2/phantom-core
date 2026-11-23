@@ -10,7 +10,7 @@ ifeq ($(OS),Windows_NT)
 Not available for Windows! use bash in WSL
 endif
 
-TAGS=with_gvisor,with_quic,with_utls,with_grpc,with_conntrack,with_clash_api,with_naive_outbound
+TAGS=with_quic,with_utls,with_grpc,with_conntrack,with_clash_api
 IOS_ADD_TAGS=with_dhcp,with_low_memory,with_purego
 DARWIN_ADD_TAGS=with_dhcp
 WINDOWS_ADD_TAGS=with_purego
