@@ -32,11 +32,7 @@ func (d *DefaultDialer) dialParallelInterface(ctx context.Context, dialer net.Di
 		} else {
 			iif = fallbackInterfaces[0]
 		}
-		perNetDialer := dialer
-		if defaultInterface == nil || iif.Index != defaultInterface.Index {
-			perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
-		}
-		conn, err := perNetDialer.DialContext(ctx, network, addr)
+		conn, err := d.dialInterface(ctx, dialer, defaultInterface, iif, network, addr)
 		if err != nil {
 			return nil, false, E.Cause(err, "dial ", iif.Name, " (", iif.Index, ")")
 		}
@@ -54,29 +50,7 @@ func (d *DefaultDialer) dialParallelInterface(ctx context.Context, dialer net.Di
 	}
 	results := make(chan dialResult) // unbuffered
 	startRacer := func(ctx context.Context, primary bool, iif adapter.NetworkInterface) {
-		var (
-			conn net.Conn
-			err  error
-		)
-		if d.tunnelDialer != nil {
-			perNetDialer := d.dialer4.Dialer
-			if defaultInterface == nil || iif.Index != defaultInterface.Index {
-				perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
-			}
-			switch N.NetworkName(network) {
-			case N.NetworkUDP:
-				conn, err = d.tunnelDialer.DialContextUDP(ctx, compat.WithAddr(addr), compat.WithDialer(&perNetDialer))
-			case N.NetworkTCP:
-				conn, err = d.tunnelDialer.DialContextTCP(ctx, compat.WithAddr(addr), compat.WithDialer(&perNetDialer))
-			}
-		} else {
-
-			perNetDialer := dialer
-			if defaultInterface == nil || iif.Index != defaultInterface.Index {
-				perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
-			}
-			conn, err = perNetDialer.DialContext(ctx, network, addr)
-		}
+		conn, err := d.dialInterface(ctx, dialer, defaultInterface, iif, network, addr)
 
 		if err != nil {
 			select {
@@ -129,6 +103,26 @@ func (d *DefaultDialer) dialParallelInterface(ctx context.Context, dialer net.Di
 	}
 }
 
+func (d *DefaultDialer) dialInterface(ctx context.Context, dialer net.Dialer, defaultInterface *control.Interface, iif adapter.NetworkInterface, network string, addr string) (net.Conn, error) {
+	if d.tunnelDialer != nil {
+		perNetDialer := d.dialer4.Dialer
+		if defaultInterface == nil || iif.Index != defaultInterface.Index {
+			perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
+		}
+		switch N.NetworkName(network) {
+		case N.NetworkUDP:
+			return d.tunnelDialer.DialContextUDP(ctx, compat.WithAddr(addr), compat.WithDialer(&perNetDialer))
+		case N.NetworkTCP:
+			return d.tunnelDialer.DialContextTCP(ctx, compat.WithAddr(addr), compat.WithDialer(&perNetDialer))
+		}
+	}
+	perNetDialer := dialer
+	if defaultInterface == nil || iif.Index != defaultInterface.Index {
+		perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
+	}
+	return perNetDialer.DialContext(ctx, network, addr)
+}
+
 func (d *DefaultDialer) dialParallelInterfaceFastFallback(ctx context.Context, dialer net.Dialer, network string, addr string, strategy C.NetworkStrategy, interfaceType []C.InterfaceType, fallbackInterfaceType []C.InterfaceType, fallbackDelay time.Duration, resetFastFallback func(time.Time)) (net.Conn, bool, error) {
 	primaryInterfaces, fallbackInterfaces := selectInterfaces(d.networkManager, strategy, interfaceType, fallbackInterfaceType)
 	if len(primaryInterfaces)+len(fallbackInterfaces) == 0 {
@@ -146,11 +140,7 @@ func (d *DefaultDialer) dialParallelInterfaceFastFallback(ctx context.Context, d
 		} else {
 			iif = fallbackInterfaces[0]
 		}
-		perNetDialer := dialer
-		if defaultInterface == nil || iif.Index != defaultInterface.Index {
-			perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
-		}
-		conn, err := perNetDialer.DialContext(ctx, network, addr)
+		conn, err := d.dialInterface(ctx, dialer, defaultInterface, iif, network, addr)
 		if err != nil {
 			return nil, false, E.Cause(err, "dial ", iif.Name, " (", iif.Index, ")")
 		}
@@ -169,29 +159,7 @@ func (d *DefaultDialer) dialParallelInterfaceFastFallback(ctx context.Context, d
 	startAt := time.Now()
 	results := make(chan dialResult) // unbuffered
 	startRacer := func(ctx context.Context, primary bool, iif adapter.NetworkInterface) {
-		var (
-			conn net.Conn
-			err  error
-		)
-		if d.tunnelDialer != nil {
-			perNetDialer := d.dialer4.Dialer
-			if defaultInterface == nil || iif.Index != defaultInterface.Index {
-				perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
-			}
-			switch N.NetworkName(network) {
-			case N.NetworkUDP:
-				conn, err = d.tunnelDialer.DialContextUDP(ctx, compat.WithAddr(addr), compat.WithDialer(&perNetDialer))
-			case N.NetworkTCP:
-				conn, err = d.tunnelDialer.DialContextTCP(ctx, compat.WithAddr(addr), compat.WithDialer(&perNetDialer))
-			}
-		} else {
-
-			perNetDialer := dialer
-			if defaultInterface == nil || iif.Index != defaultInterface.Index {
-				perNetDialer.Control = control.Append(perNetDialer.Control, control.BindToInterface(nil, iif.Name, iif.Index))
-			}
-			conn, err = perNetDialer.DialContext(ctx, network, addr)
-		}
+		conn, err := d.dialInterface(ctx, dialer, defaultInterface, iif, network, addr)
 
 		if err != nil {
 			select {

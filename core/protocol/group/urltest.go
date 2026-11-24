@@ -342,6 +342,13 @@ func (g *URLTestGroup) Select(network string) (adapter.Outbound, bool) {
 		}
 	}
 
+	// 2b. UDP 选路优先复用已选中的 TCP 节点（若支持 UDP 且仍在容差池内），避免 TCP/UDP 出口 IP 分裂
+	if network == N.NetworkUDP && g.selectedOutboundTCP != nil && common.Contains(g.selectedOutboundTCP.Network(), network) {
+		if history := g.history.LoadURLTestHistory(RealTag(g.selectedOutboundTCP, network)); history != nil && uint32(history.Delay) <= threshold {
+			return g.selectedOutboundTCP, true
+		}
+	}
+
 	// 3. 当前节点不可用或已劣化，构建容差池并随机选一个新节点
 	var pool []adapter.Outbound
 	for _, detour := range g.outbounds {

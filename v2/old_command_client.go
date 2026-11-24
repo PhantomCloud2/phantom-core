@@ -51,7 +51,7 @@ func (cch *OldCommandClientHandler) WriteStatus(message *libbox.StatusMessage) {
 	)
 
 	if err != nil {
-		bridge.SendStringToPort(cch.port, fmt.Sprintf("error: %e", err))
+		bridge.SendStringToPort(cch.port, fmt.Sprintf("error: %v", err))
 	} else {
 		bridge.SendStringToPort(cch.port, string(msg))
 	}
@@ -93,7 +93,7 @@ func (cch *OldCommandClientHandler) WriteGroups(message libbox.OutboundGroupIter
 
 	response, err := json.Marshal(groups)
 	if err != nil {
-		bridge.SendStringToPort(cch.port, fmt.Sprintf("error: %e", err))
+		bridge.SendStringToPort(cch.port, fmt.Sprintf("error: %v", err))
 	} else {
 		bridge.SendStringToPort(cch.port, string(response))
 	}

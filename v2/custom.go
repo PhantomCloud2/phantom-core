@@ -154,6 +154,7 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 
 	err = instance.Start()
 	if err != nil {
+		_ = instance.Close()
 		Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
 		resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_START_SERVICE, err.Error())
 		StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
@@ -195,25 +196,19 @@ func Stop() (*pb.CoreInfoResponse, error) {
 
 	if oldCommandServer != nil {
 		err := oldCommandServer.CloseService()
-		if err != nil {
-			return &pb.CoreInfoResponse{
-				CoreState:   CoreState,
-				MessageType: pb.MessageType_UNEXPECTED_ERROR,
-				Message:     "Error while stopping the service",
-			}, errors.New("error while stopping the service")
-		}
 		oldCommandServer.Close()
 		oldCommandServer = nil
+		if err != nil {
+			resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_UNEXPECTED_ERROR, err.Error())
+			return resp, errors.New("error while stopping the service")
+		}
 	} else {
 		err := Box.Close()
-		if err != nil {
-			return &pb.CoreInfoResponse{
-				CoreState:   CoreState,
-				MessageType: pb.MessageType_UNEXPECTED_ERROR,
-				Message:     "Error while stopping the service",
-			}, errors.New("error while stopping the service")
-		}
 		Box = nil
+		if err != nil {
+			resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_UNEXPECTED_ERROR, err.Error())
+			return resp, errors.New("error while stopping the service")
+		}
 	}
 
 	resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_EMPTY, "")

@@ -2,6 +2,7 @@ package main
 
 /*
 #include "stdint.h"
+#include <stdlib.h>
 */
 import "C"
 
@@ -15,6 +16,8 @@ import (
 	"github.com/sagernet/sing-box/experimental/libbox"
 	"github.com/sagernet/sing-box/log"
 )
+
+var emptyCStr = C.CString("")
 
 //export setupOnce
 func setupOnce(api unsafe.Pointer) {
@@ -95,8 +98,9 @@ func urlTest(groupTag *C.char) (CErr *C.char) {
 // It returns a JSON string with fields: status_code, headers, body.
 // On error it returns "error:<message>".
 //
-// IMPORTANT: The Dart caller must free the returned C string via malloc.free()
-// after calling toDartString() to avoid memory leaks.
+// IMPORTANT: The Dart caller must free the returned C string via freeString()
+// after calling toDartString() to avoid memory leaks or allocator mismatches
+// across platforms (e.g. Windows MinGW CRT vs CoTaskMemFree).
 //
 //export fetchSubscriptionWithECH
 func fetchSubscriptionWithECH(urlStr *C.char, headersJson *C.char, _ C.int) *C.char {
@@ -126,9 +130,16 @@ func fetchSubscriptionWithECH(urlStr *C.char, headersJson *C.char, _ C.int) *C.c
 	return C.CString(contentBox.Value)
 }
 
+//export freeString
+func freeString(ptr *C.char) {
+	if ptr != nil && ptr != emptyCStr {
+		C.free(unsafe.Pointer(ptr))
+	}
+}
+
 func emptyOrErrorC(err error) *C.char {
 	if err == nil {
-		return C.CString("")
+		return emptyCStr
 	}
 	log.Error(err.Error())
 	return C.CString(err.Error())

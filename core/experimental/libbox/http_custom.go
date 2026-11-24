@@ -199,7 +199,7 @@ func (r *customHTTPRequest) Execute() (HTTPResponse, error) {
 	successCh := make(chan httpResult, len(funcs))
 	var mu sync.Mutex
 	var finalErr error
-	var successCount int32
+	var winner int32
 	var failedCount int32
 
 	for i, f := range funcs {
@@ -214,7 +214,7 @@ func (r *customHTTPRequest) Execute() (HTTPResponse, error) {
 				}
 				return
 			}
-			if atomic.CompareAndSwapInt32(&successCount, 0, 1) {
+			if atomic.CompareAndSwapInt32(&winner, 0, 1) {
 				successCh <- httpResult{resp: resp, cleanup: cleanup}
 			} else {
 				resp.Body.Close() // loser — discard
@@ -252,13 +252,12 @@ func (r *customHTTPRequest) Execute() (HTTPResponse, error) {
 		return &customHTTPResponse{content: jsonBytes}, nil
 
 	case <-ctx.Done():
-		select {
-		case res := <-successCh:
+		if !atomic.CompareAndSwapInt32(&winner, 0, 2) {
+			res := <-successCh
 			res.resp.Body.Close()
 			if res.cleanup != nil {
 				res.cleanup()
 			}
-		default:
 		}
 		mu.Lock()
 		defer mu.Unlock()
@@ -283,7 +282,7 @@ func (h *customHTTPResponse) WriteTo(path string) error {
 
 func (h *customHTTPResponse) WriteToWithProgress(path string, handler HTTPResponseWriteToProgressHandler) error {
 	err := os.WriteFile(path, h.content, 0o644)
-	if err == nil {
+	if err == nil && handler != nil {
 		handler.Update(int64(len(h.content)), int64(len(h.content)))
 	}
 	return err

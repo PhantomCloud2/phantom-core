@@ -37,6 +37,7 @@ type CommandServer struct {
 	oomRecorder       *oomkiller.Recorder
 	grpcServer        *grpc.Server
 	listener          net.Listener
+	ephemeralPort     bool
 }
 
 type CommandServerHandler interface {
@@ -161,6 +162,7 @@ func (s *CommandServer) Start() error {
 			}
 		}
 	} else {
+		ephemeral := sCommandServerListenPort == 0
 		listener, err = net.Listen("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(int(sCommandServerListenPort))))
 		if err != nil {
 			return E.Cause(err, "listen command server")
@@ -168,6 +170,7 @@ func (s *CommandServer) Start() error {
 		// Write back the actual bound port (important when sCommandServerListenPort == 0,
 		// i.e. the OS assigned a random port) so CommandClient can connect to the right port.
 		sCommandServerListenPort = uint16(listener.Addr().(*net.TCPAddr).Port)
+		s.ephemeralPort = ephemeral
 	}
 	s.listener = listener
 	serverOptions := []grpc.ServerOption{
@@ -190,6 +193,10 @@ func (s *CommandServer) Close() {
 		s.grpcServer.Stop()
 	}
 	common.Close(s.listener)
+	if s.ephemeralPort {
+		sCommandServerListenPort = 0
+		s.ephemeralPort = false
+	}
 	s.StartedService.Close()
 	s.oomRecorder.Close()
 	s.powerManager.Close()

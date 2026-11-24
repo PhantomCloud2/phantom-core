@@ -4,6 +4,7 @@
 package bridge
 
 // #include "stdint.h"
+// #include <stdlib.h>
 // #include "include/dart_api_dl.c"
 //
 // // Go does not allow calling C function pointers directly. So we are
@@ -29,6 +30,7 @@ func SendStringToPort(port int64, msg string) {
 	var obj C.Dart_CObject
 	obj._type = C.Dart_CObject_kString
 	msg_obj := C.CString(msg) // go string -> char*s
+	defer C.free(unsafe.Pointer(msg_obj))
 	// union type, we do a force conversion
 	ptr := unsafe.Pointer(&obj.value[0])
 	*(**C.char)(ptr) = msg_obj
