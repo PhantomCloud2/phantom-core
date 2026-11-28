@@ -452,8 +452,6 @@ type urlTestBatch struct {
 	groups   []adapter.OutboundGroup
 	access   sync.Mutex
 	result   map[string]uint16
-	stored   map[string]*adapter.URLTestHistory
-	deleted  []string
 }
 
 func URLTestOutbounds(ctx context.Context, outboundManager adapter.OutboundManager, history *urltest.HistoryStorage, logger log.Logger, outbounds []adapter.Outbound, link string, interval time.Duration, force bool) map[string]uint16 {
@@ -472,11 +470,9 @@ func urlTestOutbounds(ctx context.Context, outboundManager adapter.OutboundManag
 		batch:    b,
 		checked:  make(map[string]bool),
 		result:   make(map[string]uint16),
-		stored:   make(map[string]*adapter.URLTestHistory),
 	}
 	testBatch.test(outbounds, link, interval, force)
 	b.Wait()
-	history.UpdateURLTestHistory(testBatch.stored, testBatch.deleted)
 	for _, outboundGroup := range testBatch.groups {
 		groupHistory := history.LoadURLTestHistory(RealTag(outboundGroup, N.NetworkTCP))
 		if groupHistory != nil {
@@ -535,16 +531,14 @@ func (b *urlTestBatch) test(outbounds []adapter.Outbound, link string, interval 
 						return nil, nil
 					}
 					b.logger.Debug("outbound ", tag, " unavailable: ", testResult.err)
-					b.access.Lock()
-					b.deleted = append(b.deleted, tag)
-					b.access.Unlock()
+					b.history.DeleteURLTestHistory(tag)
 				} else {
 					b.logger.Debug("outbound ", tag, " available: ", testResult.delay, "ms")
-					b.access.Lock()
-					b.stored[tag] = &adapter.URLTestHistory{
+					b.history.StoreURLTestHistory(tag, &adapter.URLTestHistory{
 						Time:  time.Now(),
 						Delay: testResult.delay,
-					}
+					})
+					b.access.Lock()
 					b.result[tag] = testResult.delay
 					b.access.Unlock()
 				}
